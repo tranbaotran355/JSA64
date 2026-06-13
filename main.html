@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechSphere | Modern Electronics Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Responsive Design Framework -->
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        :root {
+            --primary-dark: #0F2854;
+            --secondary-blue: #1C4D8D;
+            --accent-blue: #4988C4;
+            --light-bg: #BDE8F5;
+            --white: #FFFFFF;
+            --gray-light: #F5F7FA;
+            --gray-medium: #E0E6ED;
+            --gray-dark: #6B7280;
+            --shadow: rgba(15, 40, 84, 0.08);
+            --shadow-hover: rgba(15, 40, 84, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-dark);
+            background-color: var(--white);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--white);
+            box-shadow: 0 2px 15px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            cursor: pointer;
+        }
+
+        .logo span {
+            color: var(--accent-blue);
+        }
+
+        .logo .picLogo {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+            object-fit: contain;
+            display: inline-block;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav ul li a {
+            font-weight: 500;
+            font-size: 16px;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        nav ul li a:hover {
+            color: var(--accent-blue);
+        }
+
+        nav ul li a.active {
+            color: var(--secondary-blue);
+        }
+
+        nav ul li a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--secondary-blue);
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-icons i {
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .header-icons i:hover {
+            color: var(--accent-blue);
+        }
+
+        .cart-count {
+            background-color: var(--accent-blue);
+            color: white;
+            font-size: 12px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+
+        .cart-icon {
+            position: relative;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            background-color: var(--light-bg);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        .hero-text {
+            flex: 1;
+            max-width: 600px;
+        }
+
+        .hero-text h1 {
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            color: var(--secondary-blue);
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-blue);
+            color: white;
+            border: 2px solid var(--secondary-blue);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--secondary-blue);
+            border: 2px solid var(--secondary-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-blue);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px var(--shadow-hover);
+        }
+
+        .hero-image {
+            flex: 1;
+            max-width: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(15, 40, 84, 0.1);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.03);
+        }
+
+        /* Categories Section */
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 50px;
+            color: var(--primary-dark);
+        }
+
+        .categories {
+            padding: 80px 0;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+        }
+
+        .category-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .category-icon {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .category-card:hover .category-icon {
+            background-color: var(--accent-blue);
+            box-shadow: 0 10px 25px rgba(73, 136, 196, 0.2);
+        }
+
+        .category-icon i {
+            font-size: 50px;
+            color: var(--secondary-blue);
+            transition: color 0.3s;
+        }
+
+        .category-card:hover .category-icon i {
+            color: white;
+        }
+
+        .category-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .category-card p {
+            color: var(--gray-dark);
+            font-size: 14px;
+        }
+
+        /* Featured Products */
+        .featured-products {
+            padding: 80px 0;
+            background-color: var(--gray-light);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px var(--shadow-hover);
+        }
+
+        .product-image {
+            height: 220px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-category {
+            color: var(--accent-blue);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .current-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--secondary-blue);
+        }
+
+        .original-price {
+            font-size: 16px;
+            color: var(--gray-dark);
+            text-decoration: line-through;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .product-rating i {
+            color: #FFC107;
+            font-size: 14px;
+        }
+
+        .product-rating span {
+            color: var(--gray-dark);
+            font-size: 14px;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--secondary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-cart:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Trust Badges */
+        .trust-badges {
+            padding: 80px 0;
+        }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 30px;
+        }
+
+        .badge-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .badge-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .badge-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .badge-icon i {
+            font-size: 30px;
+            color: var(--secondary-blue);
+        }
+
+        .badge-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .badge-card p {
+            color: var(--gray-dark);
+            font-size: 15px;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--light-bg);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #B0C4DE;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .newsletter-form {
+            display: flex;
+            margin-top: 15px;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 6px 0 0 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .newsletter-form button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .newsletter-form button:hover {
+            background-color: var(--secondary-blue);
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        .social-icons a:hover {
+            background-color: var(--accent-blue);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #B0C4DE;
+            font-size: 14px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 40px;
+            }
+
+            .hero-image {
+                max-width: 80%;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            nav {
+                position: fixed;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: var(--white);
+                box-shadow: 0 10px 20px var(--shadow);
+                padding: 20px;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s;
+                z-index: 99;
+            }
+
+            nav.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .hero-text h1 {
+                font-size: 32px;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .category-icon {
+                width: 120px;
+                height: 120px;
+            }
+
+            .category-icon i {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero {
+                padding: 60px 0;
+            }
+
+            .hero-text h1 {
+                font-size: 28px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 15px;
+            }
+
+            .section-title {
+                font-size: 28px;
+                margin-bottom: 40px;
+            }
+
+            .categories,
+            .featured-products,
+            .trust-badges {
+                padding: 60px 0;
+            }
+
+            .category-grid,
+            .product-grid,
+            .badge-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .category-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .category-icon i {
+                font-size: 35px;
+            }
+        }
+
+        /* ── Chatbot Styles ── */
+        #chat-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        #chat-toggle:hover { background: #4338ca; transform: scale(1.08); }
+
+        #chat-badge {
+            position: absolute;
+            top: 2px; right: 2px;
+            width: 14px; height: 14px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: none;
+        }
+
+        #chat-panel {
+            position: fixed;
+            bottom: 88px;
+            right: 24px;
+            width: 340px;
+            height: 480px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            overflow: hidden;
+            transform: scale(0.85) translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transform-origin: bottom right;
+            transition: transform 0.22s ease, opacity 0.22s ease;
+        }
+
+        #chat-panel.open {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #chat-header {
+            background: #4f46e5;
+            color: #fff;
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chat-header .avatar {
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+
+        #chat-header .info { flex: 1; }
+        #chat-header .info h3 { font-size: 0.88rem; font-weight: 600; }
+        #chat-header .info p  { font-size: 0.72rem; opacity: 0.8; }
+
+        #chat-header #status-dot {
+            width: 7px; height: 7px;
+            background: #86efac;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        #close-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        #close-btn:hover { color: #fff; }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            max-width: 82%;
+            padding: 8px 11px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message.bot {
+            background: #f3f4f6;
+            color: #1a1a2e;
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+        }
+
+        .message.user {
+            background: #4f46e5;
+            color: #fff;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+        }
+
+        .message.typing {
+            background: #f3f4f6;
+            color: #aaa;
+            align-self: flex-start;
+            font-style: italic;
+            font-size: 0.78rem;
+        }
+
+        #suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 6px 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .suggestion-chip {
+            background: #ede9fe;
+            color: #4f46e5;
+            border: none;
+            border-radius: 20px;
+            padding: 3px 9px;
+            font-size: 0.72rem;
+            cursor: pointer;
+        }
+
+        .suggestion-chip:hover { background: #ddd6fe; }
+
+        #input-area {
+            display: flex;
+            gap: 7px;
+            padding: 9px 10px;
+            border-top: 1px solid #eee;
+        }
+
+        #user-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 7px 10px;
+            font-size: 0.82rem;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #user-input:focus { border-color: #4f46e5; }
+
+        #send-btn {
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 13px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: background 0.2s;
+        }
+
+        #send-btn:hover { background: #4338ca; }
+        #send-btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <!-- add picture logo here -->
+                <div class="logo" onclick="window.location.href='main.html'">
+                    <img class="picLogo" src="./other/logo.png" alt="TechSphere Logo">
+                    Tech<span>Sphere</span>
+
+                </div>
+
+
+                <nav id="main-nav">
+                    <ul>
+                        <li><a href="main.html">Home</a></li>
+                        <li><a href="product-category.html">Smartphones</a></li>
+                        <li><a href="laptops.html">Laptops</a></li>
+                        <li><a href="accessories.html">Accessories</a></li>
+                        <li><a href="smart-devices.html">Smart Devices</a></li>
+                        <li><a href="deals.html">Deals</a></li>
+                    </ul>
+                </nav>
+
+                <!-- Hamburger Menu Button -->
+                <button class="hamburger-menu" aria-label="Toggle navigation menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="header-icons">
+                    <i class="fas fa-search"></i>
+                    <a href="login.html"><i class="fas fa-user"></i></a>
+                    <div class="cart-icon">
+                        <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+                        <span class="cart-count">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>NEW ARRIVAL – Smart Technology for Everyday Life</h1>
+                    <p>Discover the latest smartphones, laptops, and smart devices designed to enhance your daily
+                        routine with cutting-edge technology.</p>
+                    <div class="hero-buttons">
+                        <a href="product-category.html" class="btn btn-primary">SHOP NOW</a>
+                        <a href="product-category.html" class="btn btn-secondary">VIEW PRODUCTS</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+                        alt="Latest Electronics">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories">
+        <div class="container">
+            <h2 class="section-title">Shop by Category</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Smartphones</h3>
+                    <p>Latest models & brands</p>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <h3>Laptops</h3>
+                    <p>Powerful & portable</p>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <h3>Accessories</h3>
+                    <p>Enhance your devices</p>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-tablet-alt"></i>
+                    </div>
+                    <h3>Tablets</h3>
+                    <p>Work & entertainment</p>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Smart Watches</h3>
+                    <p>Track & stay connected</p>
+                </div>
+
+                <div class="category-card">
+                    <div class="category-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Smart Home</h3>
+                    <p>Automate your life</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2 class="section-title">Featured Products</h2>
+            <input type="text" class="product-search" placeholder="Search products across all categories...">
+            <div class="product-grid" data-category="all" data-limit="4">
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Badges -->
+    <section class="trust-badges">
+        <div class="container">
+            <h2 class="section-title">Why Choose TechSphere</h2>
+            <div class="badge-grid">
+                <div class="badge-card">
+                    <div class="badge-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3>Fast Delivery</h3>
+                    <p>Free shipping on orders over $50. Delivery within 1-3 business days.</p>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Official Warranty</h3>
+                    <p>All products come with official manufacturer warranty for your peace of mind.</p>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>High Quality</h3>
+                    <p>We source only premium products from trusted brands and suppliers.</p>
+                </div>
+
+                <div class="badge-card">
+                    <div class="badge-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p>Our customer support team is available round the clock to assist you.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>TechSphere</h3>
+                    <p>Your trusted destination for the latest electronics and smart technology. We bring innovation to
+                        your doorstep.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Shop</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Smartphones</a></li>
+                        <li><a href="#">Laptops & Computers</a></li>
+                        <li><a href="#">Tablets</a></li>
+                        <li><a href="#">Audio & Headphones</a></li>
+                        <li><a href="#">Smart Home Devices</a></li>
+                    </ul>
+                </div> 
+
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">Warranty Information</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3>Newsletter</h3>
+                    <p>Subscribe to get updates on new arrivals, special offers and tech news.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="Your email address" required>
+                        <button type="submit">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="copyright">
+                <p>&copy; 2023 TechSphere. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple navigation helper
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+
+        // Update logo click event
+        document.querySelector('.logo').addEventListener('click', function () {
+            navigateTo('main.html');
+        });
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mainNav = document.getElementById('main-nav');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mainNav.classList.toggle('active');
+
+            // Change icon
+            const icon = mobileMenuBtn.querySelector('i');
+            if (mainNav.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (event) => {
+            if (!mainNav.contains(event.target) && !mobileMenuBtn.contains(event.target)) {
+                mainNav.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Newsletter form submission
+        const newsletterForm = document.querySelector('.newsletter-form');
+        newsletterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const input = this.querySelector('input');
+            const button = this.querySelector('button');
+
+            // Change button text to show success
+            const originalText = button.textContent;
+            button.textContent = 'Subscribed!';
+            button.style.backgroundColor = '#4CAF50';
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.backgroundColor = '';
+                input.value = '';
+            }, 2000);
+        });
+    </script>
+
+    <script>
+        // Initialize navigation
+        if (typeof navManager !== 'undefined') {
+            navManager.setupActiveMenu();
+        }
+    </script>
+    <script src="notifications.js"></script>
+    <script src="cart.js"></script>
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+
+    <script>
+        // Fix navigation links
+        document.addEventListener('DOMContentLoaded', function () {
+            // Fix Deals link
+            const dealsLinks = document.querySelectorAll('a[href="#"], a[href=""]');
+            dealsLinks.forEach(link => {
+                if (link.textContent.trim() === 'Deals' || link.textContent.includes('Deals')) {
+                    link.href = 'deals.html';
+                }
+            });
+
+            // Setup category card navigation
+            const categoryCards = document.querySelectorAll('.category-card');
+            categoryCards.forEach(card => {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', function () {
+                    const categoryName = this.querySelector('h3').textContent.toLowerCase();
+                    if (categoryName.includes('smartwatch') || categoryName.includes('smart watch')) {
+                        window.location.href = 'smart-devices.html';
+                    } else if (categoryName.includes('smartphone')) {
+                        window.location.href = 'product-category.html';
+                    } else if (categoryName.includes('laptop')) {
+                        window.location.href = 'laptops.html';
+                    } else if (categoryName.includes('accessor')) {
+                        window.location.href = 'accessories.html';
+                    } else if (categoryName.includes('tablet')) {
+                        window.location.href = 'product-category.html';
+                    } else if (categoryName.includes('smart home')) {
+                        window.location.href = 'smart-devices.html';
+                    }
+                });
+            });
+
+            // Search icon → focus search input
+            const searchIcon = document.querySelector('.fa-search');
+            const searchInput = document.querySelector('.product-search');
+            if (searchIcon && searchInput) {
+                searchIcon.style.cursor = 'pointer';
+                searchIcon.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            }
+        });
+    </script>
+
+
+
+    <!-- Chatbot Widget -->
+    <button id="chat-toggle" title="Chat với trợ lý">
+        💬
+        <span id="chat-badge"></span>
+    </button>
+
+    <div id="chat-panel">
+        <div id="chat-header">
+            <div class="avatar">🛍️</div>
+            <div class="info">
+                <h3>Trợ lý sản phẩm</h3>
+                <p><span id="status-dot"></span><span id="header-status">Đang tải...</span></p>
+            </div>
+            <button id="close-btn" title="Đóng">✕</button>
+        </div>
+        <div id="messages"></div>
+        <div id="suggestions">
+            <button class="suggestion-chip" onclick="askSuggestion(this)">Danh mục?</button>
+            <button class="suggestion-chip" onclick="askSuggestion(this)">Rẻ nhất?</button>
+            <button class="suggestion-chip" onclick="askSuggestion(this)">Điện thoại tốt</button>
+            <button class="suggestion-chip" onclick="askSuggestion(this)">Đánh giá cao</button>
+        </div>
+        <div id="input-area">
+            <textarea id="user-input" rows="1" placeholder="Hỏi về sản phẩm..."></textarea>
+            <button id="send-btn" disabled>➤</button>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS_API = 'https://script.google.com/macros/s/AKfycbwL93-aZVBuGBD0WBq7mxAEZm_nE9r4RaNXsYnMNrcDbaUfH_xuP4i4aOoZLHat19GjFg/exec';
+        const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+
+        let geminiKey = 'AIzaSyCEcgshoEYswSjpKOEshanVCzLtzILMy-s';
+        let products = [];
+        let chatHistory = [];
+        let isReady = false;
+
+        const messagesEl = document.getElementById('messages');
+        const inputEl = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatPanel = document.getElementById('chat-panel');
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatBadge = document.getElementById('chat-badge');
+        const headerStatus = document.getElementById('header-status');
+        const closeBtn = document.getElementById('close-btn');
+
+        chatToggle.addEventListener('click', () => {
+            chatPanel.classList.toggle('open');
+            chatBadge.style.display = 'none';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatPanel.classList.remove('open');
+        });
+
+        async function loadProducts() {
+            try {
+                const res = await fetch(PRODUCTS_API);
+                const data = await res.json();
+                products = data?.products ?? data ?? [];
+                if (!Array.isArray(products)) {
+                    products = [];
+                }
+                console.log('Sản phẩm đã tải:', products);
+                products = products.map(p => {
+                    const rawPrice = p.price ?? p.price_usd ?? p.amount ?? 0;
+                    let priceUSD = p.price_usd ?? null;
+                    if (priceUSD == null) {
+                        if (typeof rawPrice === 'number' && rawPrice > 10000) {
+                            priceUSD = +(rawPrice).toFixed(2);
+                        } else {
+                            priceUSD = rawPrice;
+                        }
+                    }
+                    return {
+                        ...p,
+                        title: p.title ?? p.name ?? 'Unknown Product',
+                        category: p.category ?? p.type ?? 'Khác',
+                        price: priceUSD,
+                        rating: p.rating ?? p.stars ?? 0
+                    };
+                });
+                checkReady();
+            } catch (e) {
+                console.error('Không thể tải dữ liệu sản phẩm.', e);
+            }
+        }
+
+        function checkReady() {
+            if (geminiKey && Array.isArray(products) && products.length > 0) {
+                isReady = true;
+                sendBtn.disabled = false;
+                headerStatus.textContent = 'Sẵn sàng';
+            }
+        }
+
+        function buildPrompt(userMessage) {
+            const productList = products.map(p => `${p.title} | ${p.category} | $${p.price} | ★${p.rating}`).join('\n');
+            const systemCtx = `Bạn là trợ lý tư vấn bán hàng thân thiện. Danh sách sản phẩm:\n${productList}\nTrả lời bằng tiếng Việt, ngắn gọn, hiển thị giá bằng USD.`;
+            let historyText = '';
+            for (const turn of chatHistory) {
+                const role = turn.role === 'user' ? 'Khách' : 'Trợ lý';
+                historyText += `${role}: ${turn.parts[0].text}\n`;
+            }
+            return `${systemCtx}\n\n${historyText ? 'Lịch sử:\n' + historyText + '\n' : ''}Khách: ${userMessage}\nTrợ lý:`;
+        }
+
+        async function sendToGemini(userMessage) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiKey}`;
+            const body = {
+                contents: [{ role: 'user', parts: [{ text: buildPrompt(userMessage) }] }]
+            };
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error?.message || `HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Không có phản hồi.';
+        }
+
+        async function chat(userMessage) {
+            if (!isReady) { alert('Vui lòng nhập Gemini API key và chờ dữ liệu tải!'); return; }
+            if (!userMessage.trim()) return;
+            appendMessage('user', userMessage);
+            inputEl.value = '';
+            sendBtn.disabled = true;
+            const typingEl = appendMessage('typing', '⏳ Đang suy nghĩ...');
+            try {
+                const reply = await sendToGemini(userMessage);
+                chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+                chatHistory.push({ role: 'model', parts: [{ text: reply }] });
+                typingEl.remove();
+                appendMessage('bot', reply, true);
+            } catch (e) {
+                typingEl.remove();
+                appendMessage('bot', `❌ Lỗi: ${e.message}`);
+            } finally {
+                sendBtn.disabled = false;
+                inputEl.focus();
+            }
+        }
+
+        function appendMessage(type, text, showBadge = false) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            messagesEl.appendChild(div);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            if (showBadge && !chatPanel.classList.contains('open')) {
+                chatBadge.style.display = 'block';
+            }
+            return div;
+        }
+
+        function askSuggestion(btn) {
+            inputEl.value = btn.textContent;
+            chat(btn.textContent);
+        }
+
+        sendBtn.addEventListener('click', () => chat(inputEl.value));
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chat(inputEl.value);
+            }
+        });
+
+        loadProducts();
+    </script>
+    <script src="js/products-api.js"></script>
+    <script>
+(function() {
+    var searchInput = document.querySelector('.product-search');
+    if (!searchInput) return;
+    var grids = document.querySelectorAll('.product-grid');
+    var debounceTimer;
+
+    // Save original category/limit
+    grids.forEach(function(g) {
+        g.dataset.origCategory = g.dataset.category || 'all';
+        if (g.dataset.limit) g.dataset.origLimit = g.dataset.limit;
+    });
+
+    function doSearch() {
+        var query = searchInput.value.trim();
+        grids.forEach(function(grid) {
+            if (query) {
+                grid.dataset.category = 'all';
+                grid.removeAttribute('data-limit');
+                var pagination = grid.parentElement.querySelector('.pagination');
+                if (pagination) pagination.style.display = 'none';
+            } else {
+                grid.dataset.category = grid.dataset.origCategory || 'all';
+                if (grid.dataset.origLimit) grid.dataset.limit = grid.dataset.origLimit;
+                else grid.removeAttribute('data-limit');
+                var pagination = grid.parentElement.querySelector('.pagination');
+                if (pagination) pagination.style.display = '';
+            }
+            if (window.__productsAPI && typeof window.__productsAPI.applyFilters === 'function') {
+                window.__productsAPI.applyFilters(grid);
+            }
+        });
+    }
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(doSearch, 300);
+    });
+
+    // Handle ?search= URL param
+    var params = new URLSearchParams(window.location.search);
+    var q = params.get('search');
+    if (q) {
+        searchInput.value = q;
+        (function retry() {
+            if (document.querySelector('.product-grid') && document.querySelector('.product-grid').dataset.gridId) {
+                doSearch();
+            } else {
+                setTimeout(retry, 300);
+            }
+        })();
+    }
+})();
+    </script>
+    <!-- Mobile Navigation System -->
+    <script src="js/mobile-nav.js"></script>
+</body>
+
+</html>
