@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký | TechSphere</title>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/auth.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p1CmV9c4jFZPMcN+rVFHx+EpRm2Ahk5xWd+JQ8UGdvKp0JnMddN5NafU6SNIkWzETZXnAq1Jdw4gGVqzU4JefQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="auth-page">
+  <main class="auth-shell">
+    <section class="auth-card">
+      <h1>Tạo tài khoản mới</h1>
+      <p>Đăng ký để tiếp cận toàn bộ sản phẩm và trải nghiệm giỏ hàng cá nhân hóa.</p>
+      <form id="registerForm">
+        <div class="field-row">
+          <div class="form-group">
+            <label for="registerName">Họ và tên</label>
+            <input id="registerName" class="form-control" type="text" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input id="registerEmail" class="form-control" type="email" placeholder="email@domain.com" required>
+          </div>
+        </div>
+        <div class="form-group toggle-password">
+          <label for="registerPassword">Mật khẩu</label>
+          <input id="registerPassword" class="form-control" type="password" placeholder="Tối thiểu 8 ký tự" required>
+          <button type="button" id="toggleRegisterPassword">Hiện</button>
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Xác nhận mật khẩu</label>
+          <input id="registerConfirmPassword" class="form-control" type="password" placeholder="Nhập lại mật khẩu" required>
+        </div>
+        <button type="submit" class="primary">Đăng ký</button>
+      </form>
+      <div class="auth-footer">
+        <p>Đã có tài khoản? <a href="login.html">Đăng nhập</a></p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="../js/register.js"></script>
+</body>
+</html>
