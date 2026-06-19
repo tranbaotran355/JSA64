@@ -1,15 +1,15 @@
 /**
- * TechSphere Mobile Navigation System
- * Handles hamburger menu toggle, responsive navigation, and device detection
+ * mobile-nav.js - Hệ thống menu di động cho TechSphere
+ * Xử lý nút hamburger, điều hướng responsive, phát hiện thiết bị
  * 
- * Features:
- * - Hamburger menu animation and toggle
- * - Auto-close menu on navigation link click
- * - Auto-close menu on outside click
- * - Auto-close menu on resize to desktop (768px breakpoint)
- * - Prevent body scroll when menu open
- * - Device detection utilities
- * - Touch-friendly enhancements
+ * Tính năng:
+ * - Hiệu ứng và bật/tắt menu hamburger
+ * - Tự động đóng menu khi click vào link
+ * - Tự động đóng menu khi click ra ngoài
+ * - Tự động đóng menu khi resize lên desktop (768px)
+ * - Chặn scroll body khi menu mở
+ * - Phát hiện thiết bị cảm ứng
+ * - Hỗ trợ swipe để đóng menu
  */
 
 class MobileNavigation {
@@ -29,21 +29,21 @@ class MobileNavigation {
     }
   }
 
-  /**
-   * Initialize mobile navigation system
-   * Sets up all event listeners and checks initial screen size
-   */
-  init() {
-    // Hamburger menu click
-    if (this.hamburgerBtn) {
+    /**
+     * Khởi tạo hệ thống menu di động
+     * Gắn tất cả event listeners và kiểm tra kích thước màn hình
+     */
+    init() {
+      // Click vào nút hamburger
+      if (this.hamburgerBtn) {
       this.hamburgerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.toggleMenu();
       });
     }
 
-    // Navigation link clicks - close menu after navigation
-    if (this.navLinks.length > 0) {
+      // Click vào link trong menu - đóng menu sau khi điều hướng
+      if (this.navLinks.length > 0) {
       this.navLinks.forEach(link => {
         link.addEventListener('click', () => {
           this.closeMenu();
@@ -51,16 +51,16 @@ class MobileNavigation {
       });
     }
 
-    // Outside click to close menu
-    document.addEventListener('click', (e) => {
+      // Click ra ngoài menu - đóng menu
+      document.addEventListener('click', (e) => {
       if (this.isOpen && this.navMenu && !this.navMenu.contains(e.target) && 
           (!this.hamburgerBtn || !this.hamburgerBtn.contains(e.target))) {
         this.closeMenu();
       }
     });
 
-    // Touch events for swipe-to-close
-    document.addEventListener('touchstart', (e) => {
+      // Xử lý swipe để đóng menu (kéo ngang)
+      document.addEventListener('touchstart', (e) => {
       this.touchStartX = e.changedTouches[0].screenX;
     }, false);
 
@@ -69,19 +69,19 @@ class MobileNavigation {
       this.handleSwipe();
     }, false);
 
-    // Handle window resize - close menu on desktop
-    window.addEventListener('resize', () => {
+      // Đóng menu khi resize lên desktop
+      window.addEventListener('resize', () => {
       this.handleResize();
     });
 
-    // Check initial screen size
-    this.handleResize();
-  }
+      // Kiểm tra kích thước màn hình ban đầu
+      this.handleResize();
+    }
 
-  /**
-   * Toggle menu open/closed state
-   */
-  toggleMenu() {
+    /**
+     * Bật/tắt menu (mở/đóng)
+     */
+    toggleMenu() {
     if (this.isOpen) {
       this.closeMenu();
     } else {
@@ -89,11 +89,11 @@ class MobileNavigation {
     }
   }
 
-  /**
-   * Open mobile menu
-   * Adds active classes and prevents body scroll
-   */
-  openMenu() {
+    /**
+     * Mở menu di động
+     * Thêm class active và chặn scroll body
+     */
+    openMenu() {
     this.isOpen = true;
 
     if (this.hamburgerBtn) {
@@ -105,17 +105,17 @@ class MobileNavigation {
       this.navMenu.style.flexDirection = 'column';
     }
 
-    // Prevent body scroll
+    // Chặn scroll body khi menu mở
     this.body.style.overflow = 'hidden';
     this.body.style.position = 'fixed';
 
-    // Add overlay backdrop
+    // Thêm lớp phủ mờ phía sau menu
     this.addBackdrop();
   }
 
   /**
-   * Close mobile menu
-   * Removes active classes and restores body scroll
+   * Đóng menu di động
+   * Xoá class active và khôi phục scroll body
    */
   closeMenu() {
     this.isOpen = false;
@@ -128,20 +128,20 @@ class MobileNavigation {
       this.navMenu.style.display = 'none';
     }
 
-    // Restore body scroll
+    // Khôi phục scroll body
     this.body.style.overflow = 'auto';
     this.body.style.position = 'static';
 
-    // Remove backdrop
+    // Xoá lớp phủ
     this.removeBackdrop();
   }
 
   /**
-   * Add semi-transparent backdrop when menu is open
+   * Thêm lớp phủ mờ khi menu mở
    */
   addBackdrop() {
     if (document.querySelector('.menu-backdrop')) {
-      return; // Already exists
+      return; // Đã tồn tại
     }
 
     const backdrop = document.createElement('div');
@@ -164,7 +164,7 @@ class MobileNavigation {
   }
 
   /**
-   * Remove backdrop
+   * Xoá lớp phủ
    */
   removeBackdrop() {
     const backdrop = document.querySelector('.menu-backdrop');
@@ -174,23 +174,23 @@ class MobileNavigation {
   }
 
   /**
-   * Handle window resize - close menu on desktop breakpoint
+   * Xử lý resize - đóng menu khi chuyển lên desktop
    */
   handleResize() {
     const currentWidth = window.innerWidth;
 
-    // Close menu if resizing to desktop width
+    // Đóng menu nếu resize lên kích thước desktop
     if (currentWidth >= this.desktopBreakpoint && this.isOpen) {
       this.closeMenu();
     }
 
-    // Show/hide hamburger menu based on breakpoint
+    // Ẩn/hiện nút hamburger dựa trên kích thước màn hình
     if (this.hamburgerBtn) {
       if (currentWidth < this.desktopBreakpoint) {
         this.hamburgerBtn.style.display = 'flex';
       } else {
         this.hamburgerBtn.style.display = 'none';
-        // Make sure nav is visible on desktop
+        // Hiển thị menu ngang trên desktop
         if (this.navMenu) {
           this.navMenu.style.display = 'flex';
           this.navMenu.style.flexDirection = 'row';
@@ -200,13 +200,13 @@ class MobileNavigation {
   }
 
   /**
-   * Handle swipe gestures to close menu
+   * Xử lý swipe để đóng menu
    */
   handleSwipe() {
     const swipeThreshold = 50;
     const diff = this.touchStartX - this.touchEndX;
 
-    // Swiped left - close menu
+    // Swipe sang trái - đóng menu
     if (diff > swipeThreshold && this.isOpen) {
       this.closeMenu();
     }
@@ -214,39 +214,37 @@ class MobileNavigation {
 }
 
 /**
- * Responsive Utilities
- * Helper functions for responsive design and device detection
+ * ResponsiveUtils - Tiện ích responsive
+ * Các hàm hỗ trợ thiết kế đáp ứng và phát hiện thiết bị
  */
 const ResponsiveUtils = {
   /**
    * Get current breakpoint
    * Returns the current active breakpoint based on window width
    */
-  getCurrentBreakpoint() {
-    const width = window.innerWidth;
+    getCurrentBreakpoint() {
+      const width = window.innerWidth;
 
-    if (width < 375) return 'xs';      // Extra small
-    if (width < 425) return 'sm';      // Small
-    if (width < 768) return 'md';      // Medium
-    if (width < 1024) return 'lg';     // Large
-    if (width < 1440) return 'xl';     // Extra Large
-    if (width < 1920) return '2xl';    // 2X Large
-    return '3xl';                       // 3X Large (Ultra-wide)
-  },
+      if (width < 375) return 'xs';      // Cực nhỏ
+      if (width < 425) return 'sm';      // Nhỏ
+      if (width < 768) return 'md';      // Trung bình
+      if (width < 1024) return 'lg';     // Lớn
+      if (width < 1440) return 'xl';     // Rất lớn
+      if (width < 1920) return '2xl';    // 2X Lớn
+      return '3xl';                       // Siêu rộng
+    },
 
-  /**
-   * Check if device is mobile
-   * Returns true if viewport width is less than 768px
-   */
-  isMobileDevice() {
-    return window.innerWidth < 768;
-  },
+    /**
+     * Kiểm tra có phải thiết bị di động không (width < 768px)
+     */
+    isMobileDevice() {
+      return window.innerWidth < 768;
+    },
 
-  /**
-   * Check if device supports touch
-   * Returns true if device has touch capability
-   */
-  isTouchDevice() {
+    /**
+     * Kiểm tra thiết bị có hỗ trợ cảm ứng không
+     */
+    isTouchDevice() {
     return (
       (typeof window !== 'undefined' &&
         ('ontouchstart' in window ||
@@ -257,37 +255,36 @@ const ResponsiveUtils = {
     );
   },
 
-  /**
-   * Enable touch-friendly enhancements
-   * Applies touch-specific optimizations to the page
-   */
-  enableTouchFriendly() {
-    if (this.isTouchDevice()) {
-      document.body.classList.add('touch-device');
+    /**
+     * Kích hoạt tối ưu cho thiết bị cảm ứng
+     * Tăng kích thước nút bấm cho dễ chạm
+     */
+    enableTouchFriendly() {
+      if (this.isTouchDevice()) {
+        document.body.classList.add('touch-device');
 
-      // Increase touch target sizes
-      const style = document.createElement('style');
-      style.textContent = `
-        button, .btn, input[type="button"], input[type="submit"] {
-          min-height: 44px;
-          min-width: 44px;
-        }
-        
-        a {
-          min-height: 44px;
-          display: inline-flex;
-          align-items: center;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  },
+        // Tăng kích thước vùng chạm
+        const style = document.createElement('style');
+        style.textContent = `
+          button, .btn, input[type="button"], input[type="submit"] {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          a {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    },
 
-  /**
-   * Debounce function to throttle resize events
-   * Prevents excessive function calls during window resize
-   */
-  debounce(func, wait) {
+    /**
+     * Debounce - hạn chế gọi hàm liên tục khi resize
+     */
+    debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
       const later = () => {
@@ -299,11 +296,10 @@ const ResponsiveUtils = {
     };
   },
 
-  /**
-   * Check if element is in viewport
-   * Useful for lazy loading
-   */
-  isInViewport(element) {
+    /**
+     * Kiểm tra element có nằm trong viewport không (dùng cho lazy loading)
+     */
+    isInViewport(element) {
     const rect = element.getBoundingClientRect();
     return (
       rect.top >= 0 &&
@@ -313,10 +309,10 @@ const ResponsiveUtils = {
     );
   },
 
-  /**
-   * Get viewport dimensions
-   */
-  getViewportDimensions() {
+    /**
+     * Lấy kích thước viewport (chiều rộng, chiều cao)
+     */
+    getViewportDimensions() {
     return {
       width: Math.max(
         document.documentElement.clientWidth,
@@ -329,11 +325,10 @@ const ResponsiveUtils = {
     };
   },
 
-  /**
-   * Request animation frame wrapper
-   * For smooth animations
-   */
-  requestAnimationFrame(callback) {
+    /**
+     * requestAnimationFrame wrapper (cho animation mượt)
+     */
+    requestAnimationFrame(callback) {
     return (
       window.requestAnimationFrame ||
       window.webkitRequestAnimationFrame ||
@@ -348,26 +343,24 @@ const ResponsiveUtils = {
 };
 
 /**
- * Auto-initialize mobile navigation when DOM is ready
+ * Tự động khởi tạo menu di động khi DOM sẵn sàng
  */
 function initMobileNavigation() {
-  // Check if DOM is already loaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       new MobileNavigation();
       ResponsiveUtils.enableTouchFriendly();
     });
   } else {
-    // DOM is already loaded
     new MobileNavigation();
     ResponsiveUtils.enableTouchFriendly();
   }
 }
 
-// Initialize mobile navigation
+// Khởi chạy menu di động
 initMobileNavigation();
 
-// Export for use in other scripts
+// Export ra window để dùng trong các script khác
 if (typeof window !== 'undefined') {
   window.MobileNavigation = MobileNavigation;
   window.ResponsiveUtils = ResponsiveUtils;

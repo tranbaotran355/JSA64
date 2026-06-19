@@ -1,36 +1,34 @@
 /**
- * products-api.js - Dynamic product rendering from API
+ * products-api.js - Render sản phẩm động từ API
  *
- * CATEGORY MAPPING LOGIC:
- * The API returns products with a `type` field: 'smartphone', 'laptop', 'accessories', 'smart device'.
- * We map these to the website's page structure:
- *   - smartphone  → product-category.html (Smartphones)
- *   - laptop      → laptops.html (Laptops)
- *   - accessories → accessories.html (Accessories)
- *   - smart device → smart-devices.html (Smart Devices)
+ * LOGIC ÁNH XẠ DANH MỤC:
+ * API trả về sản phẩm với trường `type`: 'smartphone', 'laptop', 'accessories', 'smart device'.
+ * Ánh xạ đến các trang:
+ *   - smartphone  → product-category.html (Điện thoại)
+ *   - laptop      → laptops.html (Laptop)
+ *   - accessories → accessories.html (Phụ kiện)
+ *   - smart device → smart-devices.html (Thiết bị thông minh)
  *
- * Each HTML page has a `.product-grid` with a `data-category` attribute.
- * The value in `data-category` is matched case-insensitively against product types.
- * Products matching the category are rendered; products with type 'all' or empty
- * show all products. Products with multiple types (comma-separated in data-category)
- * appear in all matching sections.
+ * Mỗi trang HTML có `.product-grid` với thuộc tính `data-category`.
+ * Sản phẩm khớp danh mục sẽ được render; nếu 'all' thì hiển thị tất cả.
+ * Nhiều danh mục cách nhau bằng dấu phẩy sẽ hiển thị ở tất cả trang khớp.
  */
 (function () {
   'use strict';
 
-  /* ── Configuration ── */
+  /* ── Cấu hình ── */
   const API_URL = (typeof PRODUCTS_API !== 'undefined' ? PRODUCTS_API : window.PRODUCTS_API) ||
     'https://script.google.com/macros/s/AKfycbwL93-aZVBuGBD0WBq7mxAEZm_nE9r4RaNXsYnMNrcDbaUfH_xuP4i4aOoZLHat19GjFg/exec';
-  const ITEMS_PER_PAGE = 8;
-  const CACHE_TTL = 60000;
+  const ITEMS_PER_PAGE = 8;       // Số sản phẩm mỗi trang
+  const CACHE_TTL = 60000;        // Cache tồn tại 60 giây
 
-  /* ── State ── */
-  let cachedProducts = null;
-  let lastFetch = 0;
-  let currentPage = {};
-  let activeFilters = {};
+  /* ── Biến trạng thái ── */
+  let cachedProducts = null;      // Cache sản phẩm
+  let lastFetch = 0;              // Lần fetch cuối
+  let currentPage = {};           // Trang hiện tại (theo grid ID)
+  let activeFilters = {};         // Bộ lọc đang active
 
-  /* ── Normalize product from API ── */
+  /* ── Chuẩn hoá dữ liệu sản phẩm từ API ── */
   function normalize(p) {
     const id = String(p.id ?? 'prod_' + Math.random().toString(36).slice(2, 10));
     const name = p.name ?? p.title ?? 'Unknown Product';
@@ -50,10 +48,10 @@
     rating = Math.min(5, Math.max(1, Math.round(rating)));
 
     return { id, name, price, image, type, rating,
-      originalPrice: p.original_price ? Number(p.original_price) : null };
+      originalPrice: p.original_price ? Number(p.original_price) : null }; // Giá gốc (nếu có)
   }
 
-  /* ── Fetch products with caching ── */
+  /* ── Fetch sản phẩm từ API (có cache) ── */
   async function fetchProducts(forceRefresh) {
     const now = Date.now();
     if (!forceRefresh && cachedProducts && (now - lastFetch) < CACHE_TTL) {
@@ -82,20 +80,20 @@
     }
   }
 
-  /* ── Category matching ── */
+  /* ── Kiểm tra sản phẩm có thuộc danh mục không ── */
   function matchesCategory(product, categoryFilter) {
     if (!categoryFilter || categoryFilter === 'all') return true;
     const filterTypes = categoryFilter.split(',').map(s => s.trim().toLowerCase());
     return filterTypes.some(ft => product.type === ft || product.type.includes(ft));
   }
 
-  /* ── Price formatting ── */
+  /* ── Định dạng giá ($) ── */
   function formatPrice(val) {
     if (val == null || Number.isNaN(Number(val))) return '';
     return '$' + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  /* ── Rating HTML ── */
+  /* ── Tạo HTML sao đánh giá (có hỗ trợ nửa sao) ── */
   function ratingHtml(rating) {
     const v = Number(rating) || 0;
     const full = Math.floor(v);
@@ -109,7 +107,7 @@
     return h;
   }
 
-  /* ── Create product card element ── */
+  /* ── Tạo thẻ sản phẩm (HTML) ── */
   function createCard(p) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -136,6 +134,7 @@
       </div>
     `;
 
+    // Xử lý nút "Add to Cart"
     const btn = card.querySelector('.add-to-cart');
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -162,6 +161,7 @@
       }
     });
 
+    // Click vào thẻ sản phẩm -> xem chi tiết
     card.addEventListener('click', function (e) {
       if (e.target.closest('.add-to-cart')) return;
       const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -171,7 +171,7 @@
     return card;
   }
 
-  /* ── Create deal card (with discount badge) ── */
+  /* ── Tạo thẻ deal (có badge giảm giá) ── */
   function createDealCard(p, discount) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -244,7 +244,7 @@
     return card;
   }
 
-  /* ── Show loading state ── */
+  /* ── Hiển thị trạng thái loading (skeleton) ── */
   function showLoading(grid) {
     grid.innerHTML = '';
     for (let i = 0; i < 4; i++) {
@@ -263,17 +263,17 @@
     }
   }
 
-  /* ── Show empty state ── */
+  /* ── Hiển thị trạng thái không có sản phẩm ── */
   function showEmpty(grid, message) {
     grid.innerHTML = `<div class="product-empty"><i class="fas fa-box-open" style="font-size:48px;color:#b0c4de;margin-bottom:16px;display:block;"></i><p>${message || 'No products found.'}</p></div>`;
   }
 
-  /* ── Show error state ── */
+  /* ── Hiển thị trạng thái lỗi ── */
   function showError(grid, message) {
     grid.innerHTML = `<div class="product-empty product-error"><i class="fas fa-exclamation-triangle" style="font-size:48px;color:#e53e3e;margin-bottom:16px;display:block;"></i><p>${message || 'Failed to load products.'}</p><button onclick="location.reload()" style="margin-top:12px;padding:10px 24px;border:none;border-radius:8px;background:#1c4d8d;color:white;cursor:pointer;font-weight:600;">Retry</button></div>`;
   }
 
-  /* ── Pagination ── */
+  /* ── Render phân trang ── */
   function renderPagination(container, totalPages, current, callback) {
     container.innerHTML = '';
     if (totalPages <= 1) return;
@@ -296,7 +296,7 @@
     container.appendChild(next);
   }
 
-  /* ── Process a single product grid ── */
+  /* ── Xử lý và render một grid sản phẩm ── */
   async function renderGrid(grid) {
     const catFilter = grid.dataset.category || 'all';
     const limit = Number(grid.dataset.limit) || 0;
@@ -348,7 +348,7 @@
     }
   }
 
-  /* ── Apply filters to a grid ── */
+  /* ── Áp dụng bộ lọc cho grid (giá, sắp xếp, tìm kiếm) ── */
   async function applyFilters(grid) {
     const gridId = grid.dataset.gridId;
     const catFilter = grid.dataset.category || 'all';
@@ -426,7 +426,7 @@
     }
   }
 
-  /* ── Initialize filter dropdowns ── */
+  /* ── Khởi tạo dropdown lọc và ô tìm kiếm ── */
   function initFilters(grid) {
     const gridId = grid.dataset.gridId;
     const filters = grid.closest('.container, section, div') || grid.parentElement;
@@ -466,7 +466,7 @@
     }
   }
 
-  /* ── Main render function ── */
+  /* ── Hàm render chính - tìm tất cả grid và render ── */
   async function render() {
     const grids = document.querySelectorAll('.product-grid');
     if (!grids.length) return;
@@ -482,7 +482,7 @@
     }
   }
 
-  /* ── Auto-refresh every 60s ── */
+  /* ── Tự động làm mới dữ liệu mỗi 60 giây ── */
   function startAutoRefresh() {
     setInterval(() => {
       cachedProducts = null;
@@ -491,7 +491,7 @@
     }, CACHE_TTL);
   }
 
-  /* ── Bootstrap ── */
+  /* ── Khởi động khi DOM sẵn sàng ── */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => { render(); startAutoRefresh(); });
   } else {
@@ -499,10 +499,10 @@
     startAutoRefresh();
   }
 
-  /* ── Expose for debugging ── */
+  /* ── Public API để debug ── */
   window.__productsAPI = { fetchProducts, render, applyFilters, refresh: () => { cachedProducts = null; lastFetch = 0; render(); } };
 
-  /* ── Add pulse animation ── */
+  /* ── Thêm CSS animation pulse cho skeleton loading ── */
   const style = document.createElement('style');
   style.textContent = `@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}.product-skeleton{pointer-events:none}.product-empty,.product-error{grid-column:1/-1;text-align:center;padding:60px 20px;color:#6b7280;font-size:16px}.product-search{width:100%;padding:12px 15px;border:1px solid #d1d5db;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;background:#fff;outline:none;transition:border-color .2s ease;box-sizing:border-box;margin-bottom:20px}.product-search:focus{border-color:#1C4D8D}`;
   document.head.appendChild(style);

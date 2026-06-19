@@ -1,7 +1,8 @@
-// cart.js - Shared Cart System (No Authentication Required)
+// cart.js - Hệ thống giỏ hàng dùng chung (không cần đăng nhập)
+// Lưu giỏ hàng trên localStorage, dùng cho các trang không yêu cầu tài khoản
 class CartManager {
     constructor() {
-        this.storageKey = 'cart';
+        this.storageKey = 'cart';   // Key lưu trong localStorage
         this.init();
     }
 
@@ -9,7 +10,7 @@ class CartManager {
         this.updateCartIcon();
     }
 
-    // Get all cart items
+    // Lấy danh sách sản phẩm trong giỏ hàng
     getCart() {
         try {
             const cart = localStorage.getItem(this.storageKey);
@@ -20,7 +21,7 @@ class CartManager {
         }
     }
 
-    // Save cart to localStorage
+    // Lưu giỏ hàng xuống localStorage
     saveCart(items) {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(items));
@@ -32,7 +33,7 @@ class CartManager {
         }
     }
 
-    // Add item to cart
+    // Thêm sản phẩm vào giỏ hàng
     addItem(product) {
         if (!product.id || !product.name || !product.price) {
             console.error('Invalid product:', product);
@@ -43,10 +44,10 @@ class CartManager {
         const existingItem = cart.find(item => item.id === product.id);
 
         if (existingItem) {
-            // Item already in cart - increase quantity
+            // Sản phẩm đã có - tăng số lượng
             existingItem.quantity += product.quantity || 1;
         } else {
-            // New item - add to cart
+            // Sản phẩm mới - thêm vào giỏ hàng
             cart.push({
                 id: product.id,
                 name: product.name,
@@ -60,14 +61,14 @@ class CartManager {
         return this.saveCart(cart);
     }
 
-    // Remove item from cart
+    // Xoá sản phẩm khỏi giỏ hàng
     removeItem(productId) {
         const cart = this.getCart();
         const updatedCart = cart.filter(item => item.id !== productId);
         return this.saveCart(updatedCart);
     }
 
-    // Update item quantity
+    // Cập nhật số lượng sản phẩm trong giỏ hàng
     updateQuantity(productId, quantity) {
         if (quantity <= 0) {
             return this.removeItem(productId);
@@ -84,18 +85,18 @@ class CartManager {
         return false;
     }
 
-    // Clear entire cart
+    // Xoá toàn bộ giỏ hàng
     clearCart() {
         return this.saveCart([]);
     }
 
-    // Get cart item count
+    // Đếm tổng số lượng sản phẩm
     getItemCount() {
         const cart = this.getCart();
         return cart.reduce((total, item) => total + item.quantity, 0);
     }
 
-    // Get cart subtotal
+    // Tính tạm tính (chưa gồm phí ship và thuế)
     getSubtotal() {
         const cart = this.getCart();
         return cart.reduce((total, item) => {
@@ -103,7 +104,7 @@ class CartManager {
         }, 0);
     }
 
-    // Get cart total (including tax and shipping)
+    // Tính tổng tiền (gồm thuế và phí ship)
     getTotal(shippingCost = 0, taxRate = 0.08) {
         const subtotal = this.getSubtotal();
         const tax = subtotal * taxRate;
@@ -116,7 +117,7 @@ class CartManager {
         };
     }
 
-    // Update cart icon badge in header
+    // Cập nhật badge số lượng trên icon giỏ hàng
     updateCartIcon() {
         const cartCount = document.querySelector('.cart-count');
         if (cartCount) {
@@ -126,17 +127,17 @@ class CartManager {
         }
     }
 
-    // Check if item exists in cart
+    // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
     hasItem(productId) {
         const cart = this.getCart();
         return cart.some(item => item.id === productId);
     }
 
-    // Check if cart is empty
+    // Kiểm tra giỏ hàng có rỗng không
     isEmpty() {
         return this.getCart().length === 0;
     }
 }
 
-// Create global cart instance
+// Tạo instance giỏ hàng toàn cục, dùng được ở mọi trang
 window.cartManager = new CartManager();

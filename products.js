@@ -1,4 +1,5 @@
-// products.js - Sample product data
+// products.js - Dữ liệu sản phẩm mẫu (dùng khi chưa có API)
+// Lưu trữ danh sách sản phẩm theo danh mục trên window
 window.products = {
     smartphones: [
         {

@@ -1192,7 +1192,7 @@
             // Login form submission
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                loginForm.addEventListener('submit', function (e) {
+                loginForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
 
                     const email = document.getElementById('loginEmail').value;
@@ -1204,7 +1204,7 @@
                     }
 
                     // Login using auth system
-                    const result = auth.login(email, password);
+                    const result = await auth.login(email, password);
 
                     const loginButton = this.querySelector('.auth-button');
                     const originalText = loginButton.textContent;
@@ -1232,7 +1232,7 @@
             // Registration form submission
             const registerForm = document.getElementById('registerForm');
             if (registerForm) {
-                registerForm.addEventListener('submit', function (e) {
+                registerForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
 
                     const name = document.getElementById('registerName').value;
@@ -1263,7 +1263,7 @@
                     }
 
                     // Register using auth system
-                    const result = auth.register({
+                    const result = await auth.register({
                         username: name,
                         email: email,
                         password: password
@@ -1384,7 +1384,7 @@
             // Login form submission
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
-                loginForm.addEventListener('submit', function (e) {
+                loginForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
 
                     const email = document.getElementById('loginEmail').value.trim();
@@ -1404,7 +1404,7 @@
                     }
 
                     // Login using auth system
-                    const result = auth.login(email, password);
+                    const result = await auth.login(email, password);
 
                     const loginButton = this.querySelector('.auth-button');
                     const originalText = loginButton.textContent;
@@ -1435,7 +1435,7 @@
             // Registration form submission
             const registerForm = document.getElementById('registerForm');
             if (registerForm) {
-                registerForm.addEventListener('submit', function (e) {
+                registerForm.addEventListener('submit', async function (e) {
                     e.preventDefault();
 
                     const name = document.getElementById('registerName').value.trim();
@@ -1473,7 +1473,7 @@
                     }
 
                     // Register using auth system
-                    const result = auth.register({
+                    const result = await auth.register({
                         username: name,
                         email: email,
                         password: password

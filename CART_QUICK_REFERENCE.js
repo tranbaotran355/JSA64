@@ -1,3 +1,5 @@
+// CART_QUICK_REFERENCE.js - Tài liệu tham khảo nhanh cách dùng cartManager
+// File hướng dẫn này giúp dev hiểu cách thao tác với giỏ hàng qua cartManager
 // QUICK REFERENCE: Using cartManager in Your Code
 
 // ============================================

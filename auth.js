@@ -1,56 +1,88 @@
-// auth.js - User Authentication System
+// auth.js - Hệ thống xác thực người dùng (dùng trên toàn bộ trang)
+// Quản lý đăng ký, đăng nhập, đăng xuất và giỏ hàng theo tài khoản
+
+// Băm mật khẩu bằng SHA-256 trước khi lưu
+async function getPasswordHash(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 class AuthSystem {
     constructor() {
-        this.currentUser = null;
-        this.isLoggedIn = false;
+        this.currentUser = null;        // Người dùng hiện tại
+        this.isLoggedIn = false;        // Trạng thái đã đăng nhập
         this.init();
     }
 
     init() {
-        this.loadCurrentUser();
-        this.updateUI();
-        this.updateCartIcon(); // Add this line
+        this.loadCurrentUser();         // Khôi phục phiên từ localStorage
+        this.updateUI();                // Cập nhật giao diện theo trạng thái
+        this.updateCartIcon();          // Cập nhật số lượng giỏ hàng
     }
 
-    // User registration
-    register(userData) {
+    // Đăng ký người dùng mới (hash password trước khi lưu)
+    async register(userData) {
         if (!userData.username || !userData.email || !userData.password) {
             return { success: false, message: 'All fields are required' };
         }
 
         const users = JSON.parse(localStorage.getItem('techsphere_users') || '[]');
 
-        // Check if user already exists
-        if (users.find(user => user.email === userData.email)) {
+        const email = userData.email.trim().toLowerCase();
+        // Kiểm tra email đã tồn tại chưa
+        if (users.find(user => user.email === email)) {
             return { success: false, message: 'Email already registered' };
         }
 
-        // Add new user
+        const passwordHash = await getPasswordHash(userData.password);
+
+        // Thêm người dùng mới vào danh sách
         users.push({
             id: Date.now().toString(),
             username: userData.username,
-            email: userData.email,
-            password: userData.password, // In production, this should be hashed
-            createdAt: new Date().toISOString()
+            email: email,
+            passwordHash: passwordHash,
+            createdAt: new Date().toISOString()  // Thời gian tạo tài khoản
         });
 
         localStorage.setItem('techsphere_users', JSON.stringify(users));
 
-        // Auto login after registration
+        // Tự động đăng nhập sau khi đăng ký
         return this.login(userData.email, userData.password);
     }
 
-    // User login
-    login(email, password) {
+    // Đăng nhập người dùng (hỗ trợ cả hash và plain text cũ)
+    async login(email, password) {
+        const trimmedEmail = String(email).trim().toLowerCase();
         const users = JSON.parse(localStorage.getItem('techsphere_users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
+        const user = users.find(u => u.email === trimmedEmail);
 
         if (!user) {
             return { success: false, message: 'Invalid email or password' };
         }
 
-        // Remove password before storing
-        const { password: _, ...userWithoutPassword } = user;
+        // Kiểm tra mật khẩu: ưu tiên hash, fallback plain text (tương thích ngược)
+        const passwordHash = await getPasswordHash(password);
+        let match = user.passwordHash === passwordHash;
+
+        // Fallback: kiểm tra plain text (cho user đăng ký trước khi có hash)
+        if (!match && user.password === password) {
+            user.passwordHash = passwordHash;
+            delete user.password;
+            localStorage.setItem('techsphere_users', JSON.stringify(users));
+            match = true;
+        }
+
+        if (!match) {
+            return { success: false, message: 'Invalid email or password' };
+        }
+
+        // Xoá password/hash trước khi lưu session
+        const { passwordHash: _, password: __, ...userWithoutPassword } = user;
 
         localStorage.setItem('techsphere_current_user', JSON.stringify(userWithoutPassword));
         this.currentUser = userWithoutPassword;
@@ -60,64 +92,64 @@ class AuthSystem {
         return { success: true, user: userWithoutPassword };
     }
 
-    // User logout
+    // Đăng xuất người dùng
     logout() {
-        localStorage.removeItem('techsphere_current_user');
+        localStorage.removeItem('techsphere_current_user'); // Xoá session
         this.currentUser = null;
         this.isLoggedIn = false;
         this.updateUI();
         return { success: true };
     }
 
-    // Load current user from localStorage
+    // Khôi phục người dùng từ localStorage khi load lại trang
     loadCurrentUser() {
         const userData = localStorage.getItem('techsphere_current_user');
         if (userData) {
-            this.currentUser = JSON.parse(userData);
-            this.isLoggedIn = true;
+            try {
+                this.currentUser = JSON.parse(userData);
+                this.isLoggedIn = true;
+            } catch {
+                localStorage.removeItem('techsphere_current_user');
+            }
         }
     }
 
-    // Update UI based on login state
+    // Cập nhật giao diện theo trạng thái đăng nhập
     updateUI() {
-        // Update header user icon
-        const userIcon = document.querySelector('.header-icons .fa-user');
+        const userIcon = document.querySelector('.header-icons .fa-user, .header-icons .fa-user-circle');
         if (userIcon) {
             if (this.isLoggedIn) {
+                const name = this.currentUser?.username || this.currentUser?.name || 'User';
                 userIcon.parentElement.href = '#';
-                userIcon.classList.remove('fa-user');
-                userIcon.classList.add('fa-user-circle');
-                userIcon.title = `Logged in as ${this.currentUser?.username}`;
-
-                // Add logout option on click
+                userIcon.className = 'fas fa-user-circle';
+                userIcon.title = `Xin chào, ${name}`;
                 userIcon.parentElement.onclick = (e) => {
                     e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
+                    if (confirm('Bạn có chắc muốn đăng xuất?')) {
                         this.logout();
                         window.location.reload();
                     }
                 };
             } else {
                 userIcon.parentElement.href = 'login.html';
-                userIcon.classList.remove('fa-user-circle');
-                userIcon.classList.add('fa-user');
-                userIcon.title = 'Login';
+                userIcon.className = 'fas fa-user';
+                userIcon.title = 'Đăng nhập';
                 userIcon.parentElement.onclick = null;
             }
         }
     }
 
-    // Check if user is logged in (for protected features)
+    // Kiểm tra người dùng đã đăng nhập chưa (dùng cho trang được bảo vệ)
     checkAuth() {
         return this.isLoggedIn;
     }
 
-    // Get current user
+    // Lấy thông tin người dùng hiện tại
     getCurrentUser() {
         return this.currentUser;
     }
 
-    // Get user's cart
+    // Lấy giỏ hàng của người dùng hiện tại
     getUserCart() {
         if (!this.isLoggedIn) return [];
 
@@ -126,7 +158,7 @@ class AuthSystem {
         return carts[userId] || [];
     }
 
-    // Update user's cart
+    // Cập nhật giỏ hàng của người dùng
     updateUserCart(cartItems) {
         if (!this.isLoggedIn) return false;
 
@@ -137,7 +169,7 @@ class AuthSystem {
         return true;
     }
 
-    // Clear user's cart
+    // Xoá toàn bộ giỏ hàng của người dùng
     clearUserCart() {
         if (!this.isLoggedIn) return false;
 
@@ -148,7 +180,7 @@ class AuthSystem {
         return true;
     }
 
-    // Add item to cart
+    // Thêm sản phẩm vào giỏ hàng
     addToCart(product) {
         if (!this.isLoggedIn) return false;
 
@@ -167,7 +199,7 @@ class AuthSystem {
         return this.updateUserCart(cart);
     }
 
-    // Remove item from cart
+    // Xoá sản phẩm khỏi giỏ hàng
     removeFromCart(productId) {
         if (!this.isLoggedIn) return false;
 
@@ -176,7 +208,7 @@ class AuthSystem {
         return this.updateUserCart(updatedCart);
     }
 
-    // Update item quantity
+    // Cập nhật số lượng sản phẩm trong giỏ hàng
     updateCartItemQuantity(productId, quantity) {
         if (!this.isLoggedIn) return false;
 
@@ -194,7 +226,7 @@ class AuthSystem {
         return false;
     }
 
-    // Get cart count
+    // Đếm tổng số lượng sản phẩm trong giỏ hàng
     getCartCount() {
         if (!this.isLoggedIn) return 0;
 
@@ -202,7 +234,7 @@ class AuthSystem {
         return cart.reduce((total, item) => total + (item.quantity || 1), 0);
     }
 
-    // Get cart total
+    // Tính tổng tiền giỏ hàng
     getCartTotal() {
         if (!this.isLoggedIn) return 0;
 
@@ -213,25 +245,13 @@ class AuthSystem {
             return total + (price * quantity);
         }, 0);
     }
-    // Initialize cart UI on page load
+
+    // Khởi tạo giao diện giỏ hàng
     initCartUI() {
         this.updateCartIcon();
     }
 
-    // Update cart icon with real count
-    updateCartIcon() {
-        const cartCount = document.querySelector('.cart-count');
-        if (cartCount) {
-            const count = this.getCartCount();
-            cartCount.textContent = count;
-            cartCount.style.display = count > 0 ? 'flex' : 'none';
-        }
-    }
-    initCartUI() {
-        this.updateCartIcon();
-    }
-
-    // Update cart icon with real count
+    // Cập nhật số lượng hiển thị trên icon giỏ hàng
     updateCartIcon() {
         const cartCount = document.querySelector('.cart-count');
         if (cartCount) {

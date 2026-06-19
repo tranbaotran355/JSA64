@@ -1,10 +1,12 @@
-// notifications.js - Toast notification system for success/error messages
+// notifications.js - Hệ thống thông báo toast (thành công/lỗi/thông tin)
+// Hiển thị thông báo dạng popup ở góc phải màn hình
 
 class NotificationManager {
     constructor() {
-        this.container = this.createContainer();
+        this.container = this.createContainer(); // Tạo container chứa các thông báo
     }
 
+    // Tạo container để chứa các toast notification
     createContainer() {
         const container = document.createElement('div');
         container.id = 'notification-container';
@@ -19,6 +21,7 @@ class NotificationManager {
         return container;
     }
 
+    // Hiển thị thông báo (message: nội dung, type: loại, duration: thời gian hiển thị)
     show(message, type = 'success', duration = 3000) {
         const notification = document.createElement('div');
         const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
@@ -53,20 +56,23 @@ class NotificationManager {
         return notification;
     }
 
+    // Hiển thị thông báo thành công
     success(message, duration = 3000) {
         return this.show(message, 'success', duration);
     }
 
+    // Hiển thị thông báo lỗi
     error(message, duration = 3000) {
         return this.show(message, 'error', duration);
     }
 
+    // Hiển thị thông báo thông tin
     info(message, duration = 3000) {
         return this.show(message, 'info', duration);
     }
 }
 
-// Add animations to document
+// Thêm CSS animation cho toast notification
 if (!document.querySelector('style[data-notifications]')) {
     const style = document.createElement('style');
     style.setAttribute('data-notifications', 'true');
@@ -104,5 +110,5 @@ if (!document.querySelector('style[data-notifications]')) {
     document.head.appendChild(style);
 }
 
-// Create global notification instance
+// Tạo instance thông báo toàn cục, dùng được ở mọi trang
 window.notify = new NotificationManager();
