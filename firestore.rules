@@ -37,14 +37,15 @@ service cloud.firestore {
     // `untilTs` (Firestore Timestamp) để so với request.time — Rules không
     // so sánh được chuỗi ISO. Ban cũ ghi trước khi có `untilTs` sẽ bị chặn
     // cho tới khi admin gỡ tay, đây là hành vi fail-closed có chủ đích.
+    // Rules không có câu lệnh `if`, chỉ có biểu thức `&&`/`||` ngắn mạch.
     function isNotBanned() {
       let p = myProfile();
-      if (!('ban' in p)) return true;
-      if (p.ban == null) return true;
-      if (p.ban.banned != true) return true;
-      if (p.ban.until == null) return false;
-      if (!('untilTs' in p.ban)) return false;
-      return p.ban.untilTs.toDate() < request.time;
+      return !p.keys().hasAny(['ban'])
+        || p.ban == null
+        || p.ban.banned != true
+        || (p.ban.until != null
+            && p.ban.keys().hasAny(['untilTs'])
+            && p.ban.untilTs < request.time);
     }
 
     // Các field người dùng được tự sửa trên hồ sơ của chính mình.
@@ -60,9 +61,9 @@ service cloud.firestore {
       allow read: if isOwner(uid) || isAdmin();
 
       // Tự tạo hồ sơ lúc đăng ký. Cấm đặt sẵn `role` để không thể tự phong admin.
+      // Rules không hỗ trợ toán tử `in` trên Map, phải dùng keys().hasAny().
       allow create: if isOwner(uid)
-        && !('role' in request.resource.data)
-        && !('ban' in request.resource.data);
+        && !request.resource.data.keys().hasAny(['role', 'ban']);
 
       // Chủ sửa hồ sơ: chỉ field whitelist, giữ nguyên `role`/`ban` của admin.
       allow update: if (isAdmin() && isNotBanned())
