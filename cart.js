@@ -8,13 +8,22 @@ class CartManager {
 
     init() {
         this.updateCartIcon();
+
+        // Tab khác thay đổi localStorage 'cart' -> cập nhật badge + báo cho trang
+        window.addEventListener('storage', (e) => {
+            if (e.key === this.storageKey) {
+                this.updateCartIcon();
+                window.dispatchEvent(new CustomEvent('cart:updated', { detail: { source: 'storage' } }));
+            }
+        });
     }
 
     // Lấy danh sách sản phẩm trong giỏ hàng
     getCart() {
         try {
             const cart = localStorage.getItem(this.storageKey);
-            return cart ? JSON.parse(cart) : [];
+            const items = cart ? JSON.parse(cart) : [];
+            return Array.isArray(items) ? items : [];
         } catch (error) {
             console.error('Error reading cart:', error);
             return [];
@@ -25,7 +34,15 @@ class CartManager {
     saveCart(items) {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(items));
+            // Đồng bộ giỏ hàng lên Firestore khi đã đăng nhập (fire-and-forget)
+            try {
+                if (window.auth && window.auth.isLoggedIn && typeof window.auth.updateUserCart === 'function') {
+                    window.auth.updateUserCart(items);
+                }
+            } catch (syncError) { /* Bỏ qua lỗi đồng bộ */ }
             this.updateCartIcon();
+            // Báo cho các trang đang mở biết giỏ hàng vừa thay đổi
+            window.dispatchEvent(new CustomEvent('cart:updated', { detail: { source: 'local' } }));
             return true;
         } catch (error) {
             console.error('Error saving cart:', error);
@@ -93,14 +110,15 @@ class CartManager {
     // Đếm tổng số lượng sản phẩm
     getItemCount() {
         const cart = this.getCart();
-        return cart.reduce((total, item) => total + item.quantity, 0);
+        return cart.reduce((total, item) => total + (parseInt(item.quantity, 10) || 1), 0);
     }
 
     // Tính tạm tính (chưa gồm phí ship và thuế)
     getSubtotal() {
         const cart = this.getCart();
         return cart.reduce((total, item) => {
-            return total + (parseFloat(item.price) || 0) * item.quantity;
+            const price = parseFloat(item.price) || 0;
+            return total + price * (parseInt(item.quantity, 10) || 1);
         }, 0);
     }
 

@@ -1,0 +1,11 @@
+/* =========================================================
+   storefront.css (phần riêng từng trang)
+   laptops.css - Thẻ sản phẩm laptop có mô tả thông số
+   ========================================================= */
+
+.product-specs {
+    color: var(--gray-dark);
+    font-size: 14px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}

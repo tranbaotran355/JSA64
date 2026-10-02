@@ -1,0 +1,45 @@
+/* =========================================================
+   smart-devices.css - Hero giới thiệu + feature thẻ sản phẩm
+   ========================================================= */
+
+/* ── Hero intro ── */
+.hero-intro {
+    background-color: var(--light-bg);
+    border-radius: 16px;
+    padding: 60px;
+    margin-bottom: 50px;
+    text-align: center;
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.hero-intro h1 {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 20px;
+}
+
+.hero-intro p {
+    font-size: 18px;
+    color: var(--secondary-blue);
+    max-width: 700px;
+    margin: 0 auto 30px;
+    line-height: 1.8;
+}
+
+.product-features {
+    font-size: 14px;
+    color: var(--gray-dark);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .hero-intro { padding: 40px 20px; }
+    .hero-intro h1 { font-size: 32px; }
+}
+
+@media (max-width: 576px) {
+    .hero-intro h1 { font-size: 28px; }
+    .hero-intro p { font-size: 16px; }
+}

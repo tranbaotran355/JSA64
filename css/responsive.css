@@ -141,18 +141,8 @@ button, .btn, input[type="button"], input[type="submit"] {
 
 /* ============================================================================
    MOBILE NAVIGATION - RESPONSIVE VISIBILITY
+   (menu mobile do base.css xử lý qua nav.active)
    =========================================================================== */
-
-/* Hide navigation on mobile by default */
-nav ul {
-  display: none;
-}
-
-/* Show mobile navigation when active */
-.mobile-nav.active nav ul {
-  display: flex;
-  flex-direction: column;
-}
 
 /* ============================================================================
    RESPONSIVE GRID SYSTEM
@@ -550,31 +540,6 @@ form {
   font-family: inherit;
 }
 
-/* Footer Responsive */
-footer {
-  padding: var(--space-2xl) 0 var(--space-md);
-  background-color: var(--gray-light, #F5F7FA);
-}
-
-.footer-content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-lg);
-}
-
-@media (min-width: 768px) {
-  .footer-content {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .footer-content {
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-2xl);
-  }
-}
-
 /* ============================================================================
    RESPONSIVE TABLES
    =========================================================================== */
@@ -619,43 +584,6 @@ footer {
     content: attr(data-label);
     font-weight: 600;
     min-width: 100px;
-  }
-}
-
-/* ============================================================================
-   RESPONSIVE NAVIGATION
-   =========================================================================== */
-
-/* Mobile Navigation Styles */
-@media (max-width: 767px) {
-  nav ul {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--white);
-    flex-direction: column;
-    padding: var(--space-md) 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-  }
-
-  nav ul li {
-    border-bottom: 1px solid var(--gray-light, #F5F7FA);
-  }
-
-  nav ul li:last-child {
-    border-bottom: none;
-  }
-
-  nav ul li a {
-    display: block;
-    padding: var(--space-md) var(--space-lg);
-    font-size: var(--fs-base);
-  }
-
-  .hamburger-menu {
-    display: flex;
   }
 }
 

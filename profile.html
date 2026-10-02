@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | TechSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/pages/profile.css">
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <!-- Profile -->
+    <section class="profile-section">
+        <div class="container">
+            <div class="profile-grid">
+
+                <!-- Thẻ thông tin -->
+                <div class="profile-card">
+                    <div class="avatar-wrapper" id="avatarWrapper" title="Upload a photo to update your avatar.">
+                        <img src="./other/blank-profile.png" alt="User Avatar" id="profileAvatar" />
+                        <span class="online-dot"></span>
+                        <div class="avatar-upload-overlay"><i class="fas fa-camera"></i></div>
+                        <input type="file" id="avatar-upload" accept="image/*" hidden />
+                        <div class="avatar-uploading" id="avatarUploading" hidden><i
+                                class="fas fa-spinner fa-spin"></i></div>
+                    </div>
+                    <h2>Alex Chen</h2>
+                    <div class="user-email"><i class="far fa-envelope" style="margin-right:6px;"></i>alex.chen@techsphere.com</div>
+                    <div class="user-phone" id="userPhone"><i class="fas fa-phone-alt" style="margin-right:6px;"></i><span id="userPhoneText"></span></div>
+                    <div class="user-address" id="userAddress">
+                        <i class="fas fa-map-pin" style="margin-right:6px;"></i> <span id="userAddressText"></span>
+                    </div>
+                    <div class="join-date" id="joinDate"><i class="far fa-calendar-alt"></i> <span id="joinDateText"></span></div>
+                    <button class="btn-edit" id="editProfileBtn"><i class="fas fa-pen"></i> Edit Profile</button>
+                    <button class="btn-edit" id="logoutBtn" style="margin-top: 12px; background: #ef4444;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+
+                <!-- Cột chi tiết -->
+                <div class="profile-details">
+
+                    <!-- Lịch sử đơn hàng -->
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <i class="fas fa-box"></i>
+                            <h3>Order</h3>
+                            <span class="badge-count" id="orderCount">0 orders</span>
+                        </div>
+                        <div id="orderList"></div>
+                        <div class="empty-state" id="orderEmpty" style="display:none;">
+                            <i class="fas fa-box-open"></i>
+                            <p>No orders yet</p>
+                            <span>Your orders will appear here once you complete a purchase.</span>
+                        </div>
+                        <button class="btn-edit btn-history" id="purchaseHistoryBtn" style="margin-top: 16px;"><i
+                                class="fas fa-history"></i> Purchase History</button>
+                    </div>
+
+                    <!-- Wishlist -->
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <i class="fas fa-heart"></i>
+                            <h3>Wishlist</h3>
+                            <span class="badge-count" id="wishlistCount">0 items</span>
+                        </div>
+                        <div class="wishlist-grid" id="wishlistGrid"></div>
+                        <div class="empty-state" id="wishlistEmpty" style="display:none;">
+                            <i class="far fa-heart"></i>
+                            <p>Your wishlist is empty</p>
+                            <span>Tap the heart on any product to save it here.</span>
+                        </div>
+                    </div>
+
+                    <!-- Cài đặt -->
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <i class="fas fa-sliders-h"></i>
+                            <h3>Account Settings</h3>
+                        </div>
+                        <div class="settings-list">
+                            <div class="setting-row">
+                                <span class="label"><i class="fas fa-globe"></i> Language</span>
+                                <span class="value" id="settingLanguage">English (US)</span>
+                            </div>
+                            <div class="setting-row">
+                                <span class="label"><i class="fas fa-bell"></i> Notifications</span>
+                                <div class="toggle-switch active" id="notifToggle"></div>
+                            </div>
+                            <div class="setting-row">
+                                <span class="label"><i class="fas fa-moon"></i> Dark mode</span>
+                                <div class="toggle-switch" id="darkToggle"></div>
+                            </div>
+                            <div class="setting-row">
+                                <span class="label"><i class="fas fa-credit-card"></i> Payment methods</span>
+                                <span class="value" id="settingPayment">Not set</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bảo mật -->
+                    <div class="detail-card">
+                        <div class="detail-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Security</h3>
+                        </div>
+                        <div class="security-row">
+                            <div class="sec-left">
+                                <i class="fas fa-lock"></i>
+                                <div>
+                                    <div class="sec-label">Password</div>
+                                    <div class="sec-desc">Not set yet</div>
+                                </div>
+                            </div>
+                            <button class="btn-sm">Change</button>
+                        </div>
+                        <div class="security-row">
+                            <div class="sec-left">
+                                <i class="fas fa-mobile-alt"></i>
+                                <div>
+                                    <div class="sec-label">Two-factor authentication</div>
+                                    <div class="sec-desc">Not enabled</div>
+                                </div>
+                            </div>
+                            <button class="btn-sm">Manage</button>
+                        </div>
+                        <div class="security-row">
+                            <div class="sec-left">
+                                <i class="fas fa-history"></i>
+                                <div>
+                                    <div class="sec-label">Login sessions</div>
+                                    <div class="sec-desc">Current device only</div>
+                                </div>
+                            </div>
+                            <button class="btn-sm">View</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="site-footer"></div>
+
+    <!-- Purchase History modal -->
+    <div class="purchase-history-modal" id="purchaseHistoryModal">
+        <div class="ph-modal-card">
+            <div class="ph-modal-head">
+                <h3><i class="fas fa-history" style="margin-right:8px;color:var(--accent-blue);"></i>Purchase History</h3>
+                <button class="ph-modal-close" id="purchaseHistoryClose" type="button" aria-label="Close">&times;</button>
+            </div>
+            <div class="ph-modal-body" id="purchaseHistoryBody"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore-compat.js"></script>
+    <script src="js/configFirebase.js"></script>
+    <script src="notifications.js"></script>
+    <script src="cart.js"></script>
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script src="js/components/header.js"></script>
+    <script src="js/components/footer.js"></script>
+    <script src="js/components/chatbot.js"></script>
+    <script src="js/cloudinary.js"></script>
+    <script src="js/pages/profile.js"></script>
+    <script src="js/scroll-reveal.js"></script>
+</body>
+
+</html>

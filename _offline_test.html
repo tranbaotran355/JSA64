@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Offline harness</title>
+</head>
+<body>
+<!-- Admin harness DOM -->
+<div id="orders-table-body" class="orders-table-body"></div>
+<button id="orders-history-btn" type="button">History</button>
+<div class="order-history-modal" id="order-history-modal"><div class="oh-modal-card">
+  <div class="oh-modal-head"><h3>Order History</h3><button id="orders-history-close" type="button">&times;</button></div>
+  <div class="oh-modal-body" id="history-modal-body"></div>
+</div></div>
+
+<!-- Profile harness DOM (minimal) -->
+<div class="profile-card"><h2></h2><div class="user-email"></div></div>
+<div id="userPhone"><span id="userPhoneText"></span></div>
+<div id="userAddress"><span id="userAddressText"></span></div>
+<div id="joinDate"><span id="joinDateText"></span></div>
+<div id="orderList"></div>
+<div id="orderEmpty"></div>
+<div id="orderCount"></div>
+<div id="wishlistGrid"></div>
+<div id="wishlistEmpty"></div>
+<div id="wishlistCount"></div>
+<div id="settingLanguage"></div>
+<div id="settingPayment"></div>
+<div id="notifToggle"></div>
+<div id="darkToggle"></div>
+<div id="logoutBtn"></div>
+<div id="editProfileBtn"></div>
+<div id="mobile-menu-btn"></div>
+<div id="main-nav"></div>
+<button class="wishlist-item"></button>
+
+<script src="notifications.js"></script>
+<script>
+/* ── Fake auth ─────────────────────────────────────────────── */
+var uid = 'u-e2e-1';
+
+var authStub = {
+  currentUser: { id: uid, username: 'E2E User', email: 'e2e@test.com', phone: '', address: '', createdAt: '2026-01-01' },
+  isAdmin: function () { return true; },
+  checkAuth: function () { return true; },
+  getCurrentUser: function () { return authStub.currentUser; },
+  getOrders: function () { return userOrders.slice(); },
+  setLocalMap: function (key, userId, value) { if (key === 'techsphere_orders') userOrders = value.slice(); },
+  getWishlist: function () { return []; },
+  getSettings: function () { return { language: 'English (US)', notifications: true, darkMode: false, paymentMethod: '' }; },
+  saveSettings: function () {}
+};
+window.auth = authStub;
+
+var userOrders = [
+  { id: 'TS-ORDER1', date: '2026-09-01T10:00:00Z', items: [{ name: 'Laptop X', price: 100, quantity: 1 }], itemCount: 1,
+    subtotal: 100, shipping: 9.99, tax: 8, total: 117.99, status: 'Submit',
+    userId: uid, userEmail: 'e2e@test.com',
+    customer: { firstName: 'E2E', lastName: 'User', email: 'e2e@test.com', city: 'NY' } }
+];
+
+/* ── Fake Firestore (stable per-collection instances) ──────── */
+function makeSnapshot(store) {
+  var arr = store.slice();
+  return {
+    forEach: function (fn) { arr.forEach(function (d) { fn(d); }); },
+    empty: !arr.length
+  };
+}
+var __idc = 0;
+var _ordersStore = [];
+var _historyStore = [];
+var _cols = {};
+
+function makeCollection(store) {
+  var c = {
+    orderBy: function () { return c; },
+    where: function () { return c; },
+    get: function () { return Promise.resolve(makeSnapshot(store)); },
+    add: function (data) { var d = { id: 'doc' + (++__idc), data: data }; store.push(d); return Promise.resolve({ id: d.id }); },
+    doc: function (id) {
+      return {
+        update: function (patch) { var d = store.find(function (x) { return x.id === id; }); if (d) Object.assign(d.data, patch); return Promise.resolve(); },
+        delete: function () { var i = store.findIndex(function (x) { return x.id === id; }); if (i >= 0) store.splice(i, 1); return Promise.resolve(); }
+      };
+    },
+    onSnapshot: function (cb) { c._snapCb = cb; cb(makeSnapshot(store)); return function () {}; },
+    __seed: function (data) { var d = { id: 'doc' + (++__idc) + '-' + store.length, data: data }; store.push(d); if (c._snapCb) c._snapCb(makeSnapshot(store)); return d; }
+  };
+  return c;
+}
+var db = {
+  collection: function (name) {
+    if (!_cols[name]) {
+      _cols[name] = makeCollection(name === 'orders' ? _ordersStore : name === 'order_history' ? _historyStore : []);
+    }
+    return _cols[name];
+  }
+};
+window.db = db;
+
+window.confirm = function () { return true; };
+</script>
+
+<script src="js/admin-orders.js"></script>
+<script src="js/pages/profile.js"></script>
+
+<script>
+/* ── Test driver ───────────────────────────────────────────── */
+window.__run = async function () {
+  var out = { errors: [] };
+  var wrapErr = function (name, fn) {
+    try { fn(); } catch (e) { out.errors.push(name + ': ' + e.message); }
+  };
+  try {
+
+  // seed admin order + history
+  db.collection('orders').__seed({
+    id: 'TS-ADM1', date: '2026-09-02T10:00:00Z', items: [], itemCount: 1, total: 99, status: 'Processing',
+    userId: 'u-other', userEmail: 'buyer@test.com',
+    customer: { firstName: 'Buyer', lastName: 'One', email: 'buyer@test.com' }
+  });
+  db.collection('order_history').__seed({
+    id: 'TS-HIST1', date: '2026-08-01T10:00:00Z', completedAt: '2026-08-03T10:00:00Z',
+    userEmail: 'done@test.com', customer: { firstName: 'Done', lastName: 'Guy', email: 'done@test.com' }, total: 55, items: [{}]
+  });
+
+  var tbody = document.getElementById('orders-table-body');
+  var adminRows = tbody.querySelectorAll('tr');
+  out.adminRowsBefore = adminRows.length;
+  out.adminRowHasCustomer = /Buyer One/.test(tbody.innerText) && /buyer@test\.com/.test(tbody.innerText);
+  var statusBtns = tbody.querySelectorAll('.status-btn');
+  out.statusButtonCount = statusBtns.length;
+  out.statusLabels = Array.prototype.map.call(statusBtns, function (b) { return b.dataset.status; }).join(',');
+
+  await new Promise(function (r) { setTimeout(r, 50); });
+
+  // click Shipping
+  var shipBtn = tbody.querySelector('.status-btn[data-status="Shipping"]');
+  if (shipBtn) {
+    shipBtn.click();
+    await new Promise(function (r) { setTimeout(r, 120); });
+    var badge = tbody.querySelector('.order-status-badge');
+    out.badgeAfterShipping = badge ? badge.textContent : null;
+    out.badgeClassAfterShipping = badge ? badge.className : null;
+    var doc = _ordersStore.find(function (d) { return d.data.id === 'TS-ADM1'; });
+    out.firestoreStatusAfterShipping = doc ? doc.data.status : null;
+  }
+
+  // click Submit
+  var subBtn = tbody.querySelector('.status-btn[data-status="Submit"]');
+  if (subBtn) {
+    subBtn.click();
+    await new Promise(function (r) { setTimeout(r, 120); });
+    var b2 = tbody.querySelector('.order-status-badge');
+    out.badgeAfterSubmit = b2 ? b2.textContent : null;
+    var d2 = _ordersStore.find(function (d) { return d.data.id === 'TS-ADM1'; });
+    out.firestoreStatusAfterSubmit = d2 ? d2.data.status : null;
+  }
+
+  // history modal
+  document.getElementById('orders-history-btn').click();
+  await new Promise(function (r) { setTimeout(r, 120); });
+  var modal = document.getElementById('order-history-modal');
+  out.historyModalOpen = modal.classList.contains('active');
+  var histBody = document.getElementById('history-modal-body');
+  out.historyItems = histBody ? histBody.querySelectorAll('.history-item').length : 0;
+  out.historyShowsCustomerEmail = histBody ? /done@test\.com/.test(histBody.innerText) : false;
+  document.getElementById('orders-history-close').click();
+  out.historyModalClosed = !modal.classList.contains('active');
+
+  // profile: Confirm Received flow
+  var profile = window.__profileLog = { ran: true };
+  var orderListEl = document.getElementById('orderList');
+  out.profileOrdersRendered = orderListEl.querySelectorAll('.order-item').length;
+  out.profileHasConfirmBtn = !!orderListEl.querySelector('.order-confirm');
+  out.profileBadge = orderListEl.querySelector('.order-status') ? orderListEl.querySelector('.order-status').textContent : null;
+  out.profileBadgeClass = orderListEl.querySelector('.order-status') ? orderListEl.querySelector('.order-status').className : null;
+
+  var confirmBtn = orderListEl.querySelector('.order-confirm');
+  if (confirmBtn) {
+    confirmBtn.click();
+    await new Promise(function (r) { setTimeout(r, 200); });
+    out.historyAfterConfirm = _historyStore.filter(function (h) { return h.data.id === 'TS-ORDER1'; }).length;
+    out.ordersAfterConfirm = _ordersStore.filter(function (o) { return o.data.id === 'TS-ORDER1'; }).length;
+    out.userCacheAfterConfirm = userOrders.filter(function (o) { return o.id === 'TS-ORDER1'; }).length;
+    out.profileReRendered = orderListEl.querySelectorAll('.order-item').length;
+  }
+
+  out.result = out.errors.length === 0
+    && out.adminRowsBefore === 1
+    && out.adminRowHasCustomer
+    && out.statusButtonCount === 3
+    && out.badgeAfterShipping === 'Shipping'
+    && out.firestoreStatusAfterShipping === 'Shipping'
+    && out.badgeAfterSubmit === 'Submit'
+    && out.firestoreStatusAfterSubmit === 'Submit'
+    && out.historyModalOpen
+    && out.historyItems === 1
+    && out.historyShowsCustomerEmail
+    && out.historyModalClosed
+    && out.profileOrdersRendered === 1
+    && out.profileHasConfirmBtn
+    && out.historyAfterConfirm === 1
+    && out.ordersAfterConfirm === 0
+    && out.userCacheAfterConfirm === 0
+    ? 'PASS' : 'FAIL';
+
+  window.__results = out;
+  } catch (e) { out.fatal = e.message; out.result = 'FAIL'; window.__results = out; }
+};
+var __ran = false;
+function __boot() { if (__ran) return; __ran = true; setTimeout(function () { window.__run(); }, 100); }
+document.addEventListener('DOMContentLoaded', __boot);
+window.addEventListener('load', __boot);
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+/* =========================================================
+   storefront.css - Dùng chung các trang liệt kê sản phẩm
+   (category-header, filter, pagination)
+   ========================================================= */
+
+/* ── Category header ── */
+.category-header {
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.category-header h1 {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+}
+
+.category-header p {
+    font-size: 18px;
+    color: var(--gray-dark);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ── Filter section ── */
+.filter-section {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 40px;
+    box-shadow: 0 5px 15px var(--shadow);
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--primary-dark);
+}
+
+.filter-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--gray-medium);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--primary-dark);
+    background: var(--white);
+    cursor: pointer;
+}
+
+.product-grid { margin-bottom: 60px; }
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 80px;
+}
+
+.pagination-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--primary-dark);
+    font-weight: 600;
+    border: 1px solid var(--gray-medium);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+    background: var(--secondary-blue);
+    color: white;
+    border-color: var(--secondary-blue);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .category-header h1 { font-size: 32px; }
+}
+
+@media (max-width: 576px) {
+    .filter-grid { grid-template-columns: 1fr; }
+    .category-header h1 { font-size: 28px; }
+}

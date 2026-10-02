@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist | TechSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/pages/wishlist.css">
+</head>
+
+<body>
+    <div id="site-header"></div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-content">
+                <a href="main.html">Home</a>
+                <span>/</span>
+                <span>My Wishlist</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist content -->
+    <div class="container">
+        <div class="wishlist-header">
+            <div>
+                <h1>My Wishlist</h1>
+                <p id="wishlist-subtitle">Loading your saved items...</p>
+            </div>
+            <button class="btn-add-all" id="add-all-btn" disabled>
+                <i class="fas fa-cart-plus"></i> Add All To Cart
+            </button>
+        </div>
+
+        <div class="wishlist-grid" id="wishlistGrid"></div>
+
+        <div class="empty-wishlist" id="wishlistEmpty" style="display:none;">
+            <div class="empty-icon"><i class="fas fa-heart-broken"></i></div>
+            <h2>Your Wishlist is Empty</h2>
+            <p>Tap the heart icon on any product to save it here for later. Your wishlist follows your account across
+                all devices.</p>
+            <a href="product-category.html" class="btn-start-shopping"><i class="fas fa-shopping-bag"></i> Discover Products</a>
+        </div>
+    </div>
+
+    <div id="site-footer"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore-compat.js"></script>
+    <script src="js/configFirebase.js"></script>
+    <script src="notifications.js"></script>
+    <script src="cart.js"></script>
+    <script src="auth.js"></script>
+    <script src="navigation.js"></script>
+    <script src="js/components/header.js"></script>
+    <script src="js/components/footer.js"></script>
+    <script src="js/components/chatbot.js"></script>
+    <script src="js/pages/wishlist.js"></script>
+    <script src="js/scroll-reveal.js"></script>
+</body>
+
+</html>

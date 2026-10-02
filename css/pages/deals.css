@@ -1,0 +1,254 @@
+/* =========================================================
+   deals.css - Trang khuyến mãi (banner flash sale, countdown,
+   filter bar, thẻ sản phẩm có badge giảm giá)
+   ========================================================= */
+
+:root {
+    --sale-red: #E53E3E;
+    --sale-orange: #ED8936;
+}
+
+/* ── Banner ── */
+.deals-banner {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, #1e3a6b 100%);
+    border-radius: 24px;
+    padding: 40px 40px;
+    margin-bottom: 40px;
+    color: white;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 15px 30px rgba(15, 40, 84, 0.2);
+}
+
+.banner-content h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.banner-content p {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.countdown-timer {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.timer-block {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(4px);
+    padding: 15px 20px;
+    border-radius: 16px;
+    min-width: 80px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.timer-number {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.timer-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.banner-cta {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+}
+
+.banner-cta:hover {
+    background-color: var(--light-bg);
+    color: var(--primary-dark);
+    transform: translateY(-3px);
+}
+
+.banner-highlight {
+    font-size: 22px;
+    font-weight: 600;
+    background: var(--sale-orange);
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 40px;
+    margin-bottom: 12px;
+}
+
+/* ── Filter bar ── */
+.filter-bar {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 20px 25px;
+    margin-bottom: 40px;
+    box-shadow: 0 5px 15px var(--shadow);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.filter-bar .filter-group { flex: 1 1 180px; }
+
+.filter-bar .filter-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--primary-dark);
+    font-size: 14px;
+}
+
+.filter-bar .filter-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--gray-medium);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    background: var(--white);
+    cursor: pointer;
+}
+
+.reset-btn {
+    background: var(--gray-light);
+    border: 1px solid var(--gray-medium);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.reset-btn:hover { background: var(--gray-medium); }
+
+/* ── Thẻ sản phẩm giảm giá (override base) ── */
+.product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.product-card {
+    border-radius: 20px;
+    box-shadow: 0 8px 20px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 30px var(--shadow-hover);
+}
+
+.discount-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: var(--sale-red);
+    color: white;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 40px;
+    font-size: 14px;
+    z-index: 3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-info {
+    padding: 20px 18px 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.saving-tag {
+    background: var(--light-bg);
+    color: var(--primary-dark);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 30px;
+    margin-left: auto;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.btn-primary-deals {
+    flex: 2;
+    padding: 12px 5px;
+    background-color: var(--secondary-blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 15px;
+}
+
+.btn-primary-deals:hover { background-color: var(--primary-dark); }
+
+.btn-icon {
+    flex: 0.8;
+    background: var(--gray-light);
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s;
+    color: var(--primary-dark);
+}
+
+.btn-icon:hover {
+    background: var(--accent-blue);
+    color: white;
+}
+
+@media (min-width: 1200px) {
+    .product-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .deals-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 20px;
+    }
+
+    .banner-content h1 { font-size: 32px; }
+    .countdown-timer { justify-content: center; }
+    .timer-block { min-width: 65px; padding: 10px; }
+    .timer-number { font-size: 28px; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+}
+
+@media (max-width: 576px) {
+    .action-buttons { flex-wrap: wrap; }
+    .timer-block { min-width: 55px; }
+}

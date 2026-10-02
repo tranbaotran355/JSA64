@@ -15,7 +15,7 @@ class NavigationManager {
             contact: 'contact.html'               // Liên hệ
         };
         
-        this.protectedPages = ['cart.html', 'checkout.html']; // Trang yêu cầu đăng nhập
+        this.protectedPages = ['checkout.html']; // Trang yêu cầu đăng nhập (cart + wishlist cho phép khách)
         this.init();
     }
 
@@ -23,6 +23,28 @@ class NavigationManager {
         this.setupNavigation();     // Gắn sự kiện cho các nút điều hướng
         this.setupActiveMenu();     // Đánh dấu menu đang active
         this.checkPageProtection(); // Kiểm tra quyền truy cập trang
+
+        // Đồng bộ badge khi dữ liệu giỏ hàng/wishlist thay đổi (kể cả từ tab khác)
+        ['cart:updated', 'wishlist:updated', 'auth:data-pulled'].forEach(evt => {
+            window.addEventListener(evt, () => this.updateBadges());
+        });
+        window.addEventListener('storage', () => this.updateBadges());
+        if (typeof auth !== 'undefined') this.updateBadges();
+    }
+
+    // Cập nhật số lượng trên icon giỏ hàng + wishlist ở header
+    updateBadges() {
+        try {
+            const cartEl = document.querySelector('.cart-count');
+            if (cartEl && typeof cartManager !== 'undefined' && cartManager.getCart) {
+                const count = cartManager.getItemCount();
+                cartEl.textContent = count;
+                cartEl.style.display = count > 0 ? 'flex' : 'none';
+            }
+            if (typeof auth !== 'undefined' && typeof auth.updateWishlistIcon === 'function') {
+                auth.updateWishlistIcon();
+            }
+        } catch (e) { /* Bỏ qua lỗi badge */ }
     }
 
     setupNavigation() {
@@ -145,7 +167,7 @@ class NavigationManager {
     // Chuyển hướng đến trang chỉ định
     navigateTo(page) {
         // Lưu trang hiện tại để chuyển hướng lại sau khi đăng nhập
-        if (this.protectedPages.some(protected => page.includes(protected))) {
+        if (this.protectedPages.some(protectedPage => page.includes(protectedPage))) {
             const currentPage = this.getCurrentPage();
             sessionStorage.setItem('redirectAfterLogin', currentPage);
         }

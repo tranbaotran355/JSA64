@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | TechSphere</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/pages/admin.css">
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo">
+                    Tech<span>Sphere</span> <span class="store">• Admin</span>
+                </div>
+                <span class="admin-badge">Quản trị</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                <a href="#" class="nav-item active" data-section="product-list"><i class="fas fa-boxes"></i> Products</a>
+                <a href="#" class="nav-item" data-section="orders"><i class="fas fa-truck"></i> Orders</a>
+                <a href="#" class="nav-item" data-section="users"><i class="fas fa-users"></i> Users</a>
+                <a href="#" class="nav-item" data-section="settings"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="./index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Return to Store</a>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <h1 id="page-title">Product List</h1>
+                <span class="admin-email" id="admin-email"><i class="far fa-user-circle"></i> admin@gmail.com</span>
+            </header>
+
+            <!-- Dashboard -->
+            <section class="content-section" data-section="dashboard">
+                <div class="placeholder-box">
+                    <h2><i class="fas fa-chart-line" style="margin-right:10px;color:var(--accent-blue);"></i>Dashboard</h2>
+                    <p>Dashboard is under development.</p>
+                </div>
+            </section>
+
+            <!-- Product list -->
+            <section class="content-section active" data-section="product-list">
+                <div class="content-header" id="add-header">
+                    <h2><i class="fas fa-plus-circle" style="margin-right:10px;color:var(--accent-blue);"></i>Add New
+                        Product</h2>
+                </div>
+
+                <div class="add-area" id="add-product-area">
+                    <form id="add-product-form">
+                        <div class="field-name">
+                            <label for="inp-name"><i class="fas fa-tag"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Product Name</label>
+                            <input type="text" id="inp-name" name="name" placeholder="E.g., Dell XPS 13 Laptop"
+                                required />
+                        </div>
+                        <div class="field-price">
+                            <label for="inp-price"><i class="fas fa-dollar-sign"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Price ($)</label>
+                            <input type="number" id="inp-price" name="price" min="0" placeholder="E.g., 999" required />
+                        </div>
+                        <div class="field-image">
+                            <label for="inp-image"><i class="fas fa-image"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Product Image</label>
+                            <input type="url" id="inp-image" name="imageUrl" placeholder="Or paste image URL here..."
+                                required />
+                        </div>
+                        <div class="field-inline">
+                            <div class="field-inline-input">
+                                <label for="inp-category"><i class="fas fa-list"
+                                        style="margin-right:6px;color:var(--accent-blue);"></i>Category</label>
+                                <input type="text" id="inp-category" name="category" placeholder="E.g., Electronics"
+                                    required />
+                            </div>
+                            <button type="submit"><i class="fas fa-plus"></i> Add Product</button>
+                        </div>
+                        <div class="upload-zone" id="add-upload-zone" title="Drag & drop an image or click to browse">
+                            <input type="file" id="add-file-input" accept="image/*" hidden />
+                            <img class="upload-preview" id="add-upload-preview" alt="Preview" hidden />
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Drag &amp; drop image here</span>
+                                <small>or click to browse</small>
+                            </div>
+                            <div class="upload-status" id="add-upload-status"></div>
+                            <button class="upload-remove" id="add-upload-remove" type="button"
+                                title="Remove image">&times;</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="edit-area" id="edit-product-area" style="display:none;">
+                    <div class="content-header">
+                        <h2><i class="fas fa-edit" style="margin-right:10px;color:var(--accent-blue);"></i>Edit Product</h2>
+                        <button class="btn-cancel-edit" id="cancel-edit-btn" type="button"><i class="fas fa-times"></i> Cancel</button>
+                    </div>
+                    <form id="edit-product-form">
+                        <input type="hidden" id="edit-inp-id" />
+                        <div class="field-name">
+                            <label for="edit-inp-name"><i class="fas fa-tag"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Product Name</label>
+                            <input type="text" id="edit-inp-name" name="name" placeholder="E.g., Dell XPS 13 Laptop"
+                                required />
+                        </div>
+                        <div class="field-price">
+                            <label for="edit-inp-price"><i class="fas fa-dollar-sign"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Price ($)</label>
+                            <input type="number" id="edit-inp-price" name="price" min="0" placeholder="E.g., 999" required />
+                        </div>
+                        <div class="field-image">
+                            <label for="edit-inp-image"><i class="fas fa-image"
+                                    style="margin-right:6px;color:var(--accent-blue);"></i>Product Image</label>
+                            <input type="url" id="edit-inp-image" name="imageUrl" placeholder="Or paste image URL here..."
+                                required />
+                        </div>
+                        <div class="field-inline">
+                            <div class="field-inline-input">
+                                <label for="edit-inp-category"><i class="fas fa-list"
+                                        style="margin-right:6px;color:var(--accent-blue);"></i>Category</label>
+                                <input type="text" id="edit-inp-category" name="category" placeholder="E.g., Electronics"
+                                    required />
+                            </div>
+                            <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+                        </div>
+                        <div class="upload-zone" id="edit-upload-zone" title="Drag & drop an image or click to browse">
+                            <input type="file" id="edit-file-input" accept="image/*" hidden />
+                            <img class="upload-preview" id="edit-upload-preview" alt="Preview" hidden />
+                            <div class="upload-placeholder">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Drag &amp; drop image here</span>
+                                <small>or click to browse</small>
+                            </div>
+                            <div class="upload-status" id="edit-upload-status"></div>
+                            <button class="upload-remove" id="edit-upload-remove" type="button"
+                                title="Remove image">&times;</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="content-header">
+                    <h2><i class="fas fa-list-ul" style="margin-right:10px;color:var(--accent-blue);"></i>Product List
+                    </h2>
+                </div>
+
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Category</th>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body"></tbody>
+                </table>
+            </section>
+
+            <!-- Orders -->
+            <section class="content-section" data-section="orders">
+                <div class="content-header">
+                    <h2><i class="fas fa-truck" style="margin-right:10px;color:var(--accent-blue);"></i>Orders</h2>
+                    <button class="btn-history" id="orders-history-btn" type="button"><i
+                            class="fas fa-history"></i> History</button>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- History order modal -->
+                <div class="order-history-modal" id="order-history-modal">
+                    <div class="oh-modal-card">
+                        <div class="oh-modal-head">
+                            <h3><i class="fas fa-history" style="margin-right:8px;color:var(--accent-blue);"></i>Order
+                                History</h3>
+                            <button class="oh-modal-close" id="orders-history-close" type="button">&times;</button>
+                        </div>
+                        <div class="oh-modal-body" id="history-modal-body"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users -->
+            <section class="content-section" data-section="users">
+                <div class="content-header">
+                    <h2><i class="fas fa-users" style="margin-right:10px;color:var(--accent-blue);"></i>Manage Users
+                    </h2>
+                    <span class="users-count" id="users-count"><i class="fas fa-user"></i> 0 users</span>
+                </div>
+
+                <div class="table-wrap">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Registered</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- Ban user modal -->
+                <div class="ban-user-modal" id="ban-user-modal">
+                    <div class="ban-modal-card">
+                        <div class="ban-modal-head">
+                            <h3><i class="fas fa-ban" style="margin-right:8px;color:var(--accent-blue);"></i>Ban User
+                            </h3>
+                            <button class="ban-modal-close" id="ban-modal-close" type="button">&times;</button>
+                        </div>
+                        <div class="ban-modal-body">
+                            <p class="ban-modal-desc" id="ban-modal-desc"></p>
+                            <div class="ban-duration-options" id="ban-duration-options">
+                                <button type="button" class="ban-option" data-duration="1 day">1 Day</button>
+                                <button type="button" class="ban-option" data-duration="1 week">1 Week</button>
+                                <button type="button" class="ban-option" data-duration="1 month">1 Month</button>
+                                <button type="button" class="ban-option" data-duration="1 year">1 Year</button>
+                                <button type="button" class="ban-option" data-duration="forever">Forever</button>
+                            </div>
+                        </div>
+                        <div class="ban-modal-foot">
+                            <button class="btn-cancel-ban" id="ban-modal-cancel" type="button">Cancel</button>
+                            <button class="btn-confirm-ban" id="ban-modal-confirm" type="button"><i
+                                    class="fas fa-ban"></i> Ban</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings -->
+            <section class="content-section" data-section="settings">
+                <div class="placeholder-box">
+                    <h2><i class="fas fa-sliders-h"
+                            style="margin-right:10px;color:var(--accent-blue);"></i>Settings</h2>
+                    <p>Settings page is currently under development.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore-compat.js"></script>
+    <script src="js/configFirebase.js"></script>
+    <script src="notifications.js"></script>
+    <script src="auth.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/firebase-api.js"></script>
+    <script src="js/cloudinary.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/pages/admin.js"></script>
+    <script src="js/admin-orders.js"></script>
+    <script src="js/admin-users.js"></script>
+    <script src="js/scroll-reveal.js"></script>
+</body>
+
+</html>

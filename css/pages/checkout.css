@@ -1,0 +1,377 @@
+/* =========================================================
+   checkout.css - Trang thanh toán
+   ========================================================= */
+
+/* ── Layout ── */
+.checkout-container {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 40px;
+    margin-bottom: 80px;
+}
+
+@media (max-width: 992px) {
+    .checkout-container { grid-template-columns: 1fr; }
+}
+
+.checkout-header { margin-bottom: 40px; }
+
+.checkout-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 10px;
+}
+
+.checkout-header p {
+    color: var(--gray-dark);
+    font-size: 16px;
+}
+
+/* ── Các bước ── */
+.checkout-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.checkout-steps:before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gray-medium);
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--gray-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--gray-dark);
+}
+
+.step.active .step-icon {
+    background: var(--secondary-blue);
+    border-color: var(--secondary-blue);
+    color: white;
+}
+
+.step.completed .step-icon {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: white;
+}
+
+.step span {
+    font-size: 14px;
+    color: var(--gray-dark);
+}
+
+.step.active span {
+    color: var(--secondary-blue);
+    font-weight: 500;
+}
+
+/* ── Form ── */
+.checkout-form {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 5px 15px var(--shadow);
+    margin-bottom: 40px;
+}
+
+.form-section { margin-bottom: 40px; }
+.form-section:last-child { margin-bottom: 0; }
+
+.form-section h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--primary-dark);
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--gray-medium);
+}
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--primary-dark);
+}
+
+.form-control {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1px solid var(--gray-medium);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    color: var(--primary-dark);
+    background: var(--white);
+    transition: border-color 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* ── Phương thức (vận chuyển) ── */
+.payment-method {
+    border: 1px solid var(--gray-medium);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.payment-method:hover { border-color: var(--accent-blue); }
+
+.payment-method.selected {
+    border-color: var(--secondary-blue);
+    background: var(--light-bg);
+}
+
+.payment-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.payment-header input[type="radio"] {
+    width: 18px;
+    height: 18px;
+}
+
+.payment-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.payment-icon {
+    font-size: 24px;
+    color: var(--accent-blue);
+}
+
+.payment-details {
+    color: var(--gray-dark);
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* ── Tóm tắt đơn hàng ── */
+.order-summary {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 5px 15px var(--shadow);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.order-summary h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--primary-dark);
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--gray-medium);
+}
+
+.order-items { margin-bottom: 25px; }
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.order-item:last-child { border-bottom: none; }
+
+.order-item-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-dark);
+}
+
+.order-item-info p {
+    font-size: 14px;
+    color: var(--gray-dark);
+}
+
+.order-item-price {
+    font-weight: 700;
+    color: var(--secondary-blue);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: var(--gray-dark);
+}
+
+.summary-row.total {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-medium);
+}
+
+.summary-row.total .amount {
+    font-size: 28px;
+    color: var(--secondary-blue);
+}
+
+/* ── Nút hành động ── */
+.checkout-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--gray-medium);
+}
+
+.btn-back {
+    padding: 16px 30px;
+    background-color: white;
+    color: var(--secondary-blue);
+    border: 2px solid var(--secondary-blue);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-back:hover {
+    background-color: var(--secondary-blue);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px var(--shadow-hover);
+}
+
+.btn-complete {
+    padding: 16px 40px;
+    background-color: var(--secondary-blue);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-complete:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px var(--shadow-hover);
+}
+
+/* ── Trust badges ── */
+.checkout-trust {
+    background: var(--gray-light);
+    border-radius: 12px;
+    padding: 30px;
+    margin-top: 40px;
+}
+
+.trust-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.trust-item {
+    text-align: center;
+    padding: 15px;
+}
+
+.trust-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--light-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.trust-icon i {
+    font-size: 20px;
+    color: var(--secondary-blue);
+}
+
+.trust-item h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-dark);
+}
+
+.trust-item p {
+    font-size: 13px;
+    color: var(--gray-dark);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .checkout-form { padding: 25px; }
+
+    .checkout-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .checkout-actions button { width: 100%; }
+}
+
+@media (max-width: 576px) {
+    .form-row { grid-template-columns: 1fr; }
+    .checkout-header h1 { font-size: 28px; }
+    .step span { font-size: 12px; }
+}

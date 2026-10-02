@@ -1,0 +1,160 @@
+rules_version = '2';
+
+// firestore.rules - Firestore Security Rules cho website bán hàng.
+//
+// Triển khai: firebase deploy --only firestore:rules
+// Kiểm thử:   firebase emulators:start --only firestore
+//
+// Nguyên tắc: mọi quyền admin đều xuất phát từ field `role` trong users/{uid},
+// và chỉ admin mới được tạo/ghi field đó. Client KHÔNG THỂ tự thăng chức.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ─────────── Hàm dùng chung ─────────── */
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Lấy hồ sơ của chính người đang đăng nhập
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Đây là nguồn quyền duy nhất. Vì rules chặn user tự ghi `role`
+    // nên không thể tự phong quyền.
+    function isAdmin() {
+      return isSignedIn() && myProfile().role == 'admin';
+    }
+
+    // Tài khoản đang bị ban thì không được ghi bất cứ thứ gì.
+    // Ban có `until == null` nghĩa là vĩnh viễn. Ban có thời hạn thì dùng
+    // `untilTs` (Firestore Timestamp) để so với request.time — Rules không
+    // so sánh được chuỗi ISO. Ban cũ ghi trước khi có `untilTs` sẽ bị chặn
+    // cho tới khi admin gỡ tay, đây là hành vi fail-closed có chủ đích.
+    function isNotBanned() {
+      let p = myProfile();
+      if (!('ban' in p)) return true;
+      if (p.ban == null) return true;
+      if (p.ban.banned != true) return true;
+      if (p.ban.until == null) return false;
+      if (!('untilTs' in p.ban)) return false;
+      return p.ban.untilTs.toDate() < request.time;
+    }
+
+    // Các field người dùng được tự sửa trên hồ sơ của chính mình.
+    // `role`, `ban`, `email`, `createdAt` nằm ngoài danh sách này.
+    function profileSelfEditable() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['username', 'phone', 'address', 'avatar', 'settings']);
+    }
+
+    /* ─────────── users/{uid} ─────────── */
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Tự tạo hồ sơ lúc đăng ký. Cấm đặt sẵn `role` để không thể tự phong admin.
+      allow create: if isOwner(uid)
+        && !('role' in request.resource.data)
+        && !('ban' in request.resource.data);
+
+      // Chủ sửa hồ sơ: chỉ field whitelist, giữ nguyên `role`/`ban` của admin.
+      allow update: if (isAdmin() && isNotBanned())
+        || (isOwner(uid) && isNotBanned() && profileSelfEditable());
+
+      allow delete: if isAdmin();
+    }
+
+    /* ─────────── carts/{uid} và wishlist/{uid} ─────────── */
+
+    match /carts/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if (isOwner(uid) || isAdmin()) && isNotBanned();
+    }
+
+    match /wishlist/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if (isOwner(uid) || isAdmin()) && isNotBanned();
+    }
+
+    /* ─────────── orders/{autoId} ─────────── */
+
+    match /orders/{orderId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      // Khách tự đặt hàng: `userId` phải khớp uid, không được mạo danh người khác.
+      allow create: if isSignedIn()
+        && isNotBanned()
+        && request.resource.data.userId == request.auth.uid;
+
+      // Chỉ admin đổi trạng thái đơn. Khách không tự sửa đơn sau khi đặt.
+      allow update: if isAdmin() && isNotBanned();
+
+      // Khách xoá đơn sau khi xác nhận nhận hàng (profile.js),
+      // hoặc admin xoá khi xử lý.
+      allow delete: if isAdmin()
+        || (isSignedIn() && isNotBanned() && resource.data.userId == request.auth.uid);
+    }
+
+    /* ─────────── order_history/{autoId} ─────────── */
+
+    match /order_history/{itemId} {
+      allow read: if isAdmin()
+        || (isSignedIn() && resource.data.userId == request.auth.uid);
+
+      allow create: if isSignedIn()
+        && isNotBanned()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update, delete: if isAdmin();
+    }
+
+    /* ─────────── products/{productId} ─────────── */
+
+    match /products/{productId} {
+      // Danh mục sản phẩm là dữ liệu công khai.
+      allow read: if true;
+
+      allow create, delete: if isAdmin() && isNotBanned();
+
+      // Sửa sản phẩm: admin sửa tự do; người dùng thường chỉ được cập nhật
+      // rating / ratingCount sau khi đánh giá (ratings.js). Chặn việc sửa
+      // giá, tên, tồn kho bằng cách giới hạn affectedKeys.
+      allow update: if (isAdmin() && isNotBanned())
+        || (isSignedIn() && isNotBanned()
+            && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['rating', 'ratingCount']));
+    }
+
+    /* ─────────── products/{productId}/reviews/{reviewId} ─────────── */
+
+    match /products/{productId}/reviews/{reviewId} {
+      allow read: if true;
+
+      allow create: if isSignedIn()
+        && isNotBanned()
+        && request.resource.data.userId == request.auth.uid;
+
+      allow update: if isAdmin()
+        || (isSignedIn() && isNotBanned()
+            && resource.data.userId == request.auth.uid);
+
+      allow delete: if isAdmin()
+        || (isSignedIn() && isNotBanned()
+            && resource.data.userId == request.auth.uid);
+    }
+
+    /* ─────────── Mọi collection khác: chặn tất cả ─────────── */
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,199 @@
+/* css/chatbot.css - Widget chat trợ lý sản phẩm (inject bởi js/components/chatbot.js) */
+#chat-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    padding: 0;
+    background: #1C4D8D;
+    color: #fff;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(28, 77, 141, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: background 0.2s, transform 0.2s;
+}
+
+#chat-toggle:hover { background: #1C4D8D; transform: scale(1.08); }
+
+#chat-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    background: #ef4444;
+    border-radius: 50%;
+    display: none;
+}
+
+#chat-panel {
+    position: fixed;
+    bottom: 88px;
+    right: 24px;
+    width: 340px;
+    height: 480px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
+    overflow: hidden;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transform-origin: bottom right;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+}
+
+#chat-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+#chat-header {
+    background: #1C4D8D;
+    color: #fff;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#chat-header .avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+#chat-header .info { flex: 1; }
+#chat-header .info h3 { font-size: 0.88rem; font-weight: 600; }
+#chat-header .info p { font-size: 0.72rem; opacity: 0.8; }
+
+#chat-header #status-dot {
+    width: 7px;
+    height: 7px;
+    background: #86efac;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+}
+
+#close-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+#close-btn:hover { color: #fff; }
+
+#messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message {
+    max-width: 82%;
+    padding: 8px 11px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.message.bot {
+    background: #f3f4f6;
+    color: #1a1a2e;
+    align-self: flex-start;
+    border-bottom-left-radius: 3px;
+}
+
+.message.user {
+    background: #1C4D8D;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 3px;
+}
+
+.message.typing {
+    background: #f3f4f6;
+    color: #aaa;
+    align-self: flex-start;
+    font-style: italic;
+    font-size: 0.78rem;
+}
+
+#suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 6px 10px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.suggestion-chip {
+    background: #BDE8F5;
+    color: #4988C4;
+    border: none;
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.suggestion-chip:hover { background: #1C4D8D; color: #fff; }
+
+#input-area {
+    display: flex;
+    gap: 7px;
+    padding: 9px 10px;
+    border-top: 1px solid #eee;
+}
+
+#user-input {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.82rem;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+}
+
+#user-input:focus { border-color: #4f46e5; }
+
+#send-btn {
+    background: #1C4D8D;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 13px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: background 0.2s;
+}
+
+#send-btn:hover { background: #1C4D8D; }
+#send-btn:disabled { background: #a5b4fc; cursor: not-allowed; }

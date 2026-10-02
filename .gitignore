@@ -1,0 +1,24 @@
+# Cloudflare Worker - local state
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars
+
+# Biến môi trường - KHÔNG BAO GIỜ commit
+.env
+.env.*
+!.env.example
+
+# File cấu hình local chứa key
+*.local.js
+
+# Build output
+dist/
+build/
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db

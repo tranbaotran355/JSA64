@@ -2,7 +2,7 @@
  * products-api.js - Render sản phẩm động từ API
  *
  * LOGIC ÁNH XẠ DANH MỤC:
- * API trả về sản phẩm với trường `type`: 'smartphone', 'laptop', 'accessories', 'smart device'.
+ * API trả về sản phẩm với trường `category`: 'smartphone', 'laptop', 'accessories', 'smart device'.
  * Ánh xạ đến các trang:
  *   - smartphone  → product-category.html (Điện thoại)
  *   - laptop      → laptops.html (Laptop)
@@ -17,8 +17,6 @@
   'use strict';
 
   /* ── Cấu hình ── */
-  const API_URL = (typeof PRODUCTS_API !== 'undefined' ? PRODUCTS_API : window.PRODUCTS_API) ||
-    'https://script.google.com/macros/s/AKfycbwL93-aZVBuGBD0WBq7mxAEZm_nE9r4RaNXsYnMNrcDbaUfH_xuP4i4aOoZLHat19GjFg/exec';
   const ITEMS_PER_PAGE = 8;       // Số sản phẩm mỗi trang
   const CACHE_TTL = 60000;        // Cache tồn tại 60 giây
 
@@ -34,7 +32,7 @@
     const name = p.name ?? p.title ?? 'Unknown Product';
     const price = Number(p.price ?? p.price_usd ?? p.amount ?? 0);
     const image = p.image ?? p.img ?? p.thumbnail ?? '';
-    const type = String(p.type ?? p.category ?? '').toLowerCase().trim() || 'other';
+    const category = String(p.category ?? p.type ?? '').toLowerCase().trim() || 'other';
 
     let rating = Number(p.rating ?? p.stars ?? 0);
     if (!rating || Number.isNaN(rating)) {
@@ -47,21 +45,18 @@
     }
     rating = Math.min(5, Math.max(1, Math.round(rating)));
 
-    return { id, name, price, image, type, rating,
+    return { id, name, price, image, category, rating,
       originalPrice: p.original_price ? Number(p.original_price) : null }; // Giá gốc (nếu có)
   }
 
-  /* ── Fetch sản phẩm từ API (có cache) ── */
+  /* ── Fetch sản phẩm từ Firestore qua Firebase SDK (có cache) ── */
   async function fetchProducts(forceRefresh) {
     const now = Date.now();
     if (!forceRefresh && cachedProducts && (now - lastFetch) < CACHE_TTL) {
       return cachedProducts;
     }
     try {
-      const res = await fetch(API_URL, { cache: 'no-store' });
-      const data = await res.json();
-      const rawList = data?.value ?? data?.products ?? data ?? [];
-      const list = Array.isArray(rawList) ? rawList : [];
+      const list = await window.getAllProducts();
       const seen = new Map();
       const products = [];
       for (const raw of list) {
@@ -84,7 +79,7 @@
   function matchesCategory(product, categoryFilter) {
     if (!categoryFilter || categoryFilter === 'all') return true;
     const filterTypes = categoryFilter.split(',').map(s => s.trim().toLowerCase());
-    return filterTypes.some(ft => product.type === ft || product.type.includes(ft));
+    return filterTypes.some(ft => product.category === ft || product.category.includes(ft));
   }
 
   /* ── Định dạng giá ($) ── */
@@ -107,12 +102,57 @@
     return h;
   }
 
+  /* ── Nút heart wishlist trên thẻ sản phẩm (khách + user đều dùng được) ── */
+  function createWishlistBtn(p) {
+    let wished = false;
+    try {
+      wished = typeof auth !== 'undefined' && typeof auth.isInWishlist === 'function' && auth.isInWishlist(p.id);
+    } catch (_) { /* auth.js chưa sẵn sàng */ }
+
+    const btn = document.createElement('button');
+    btn.className = 'wishlist-heart' + (wished ? ' active' : '');
+    btn.type = 'button';
+    btn.dataset.productId = p.id; // Dùng cho việc refresh trạng thái tim theo sự kiện
+    btn.title = 'Add to wishlist';
+    btn.innerHTML = `<i class="${wished ? 'fas' : 'far'} fa-heart"></i>`;
+
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof auth === 'undefined') return;
+
+      const added = auth.toggleWishlist({
+        id: p.id, name: p.name, price: p.price,
+        image: p.image, category: p.category
+      });
+      this.classList.toggle('active', added === true);
+      this.innerHTML = `<i class="${added ? 'fas' : 'far'} fa-heart"></i>`;
+      this.title = added ? 'Remove from wishlist' : 'Add to wishlist';
+      if (window.notify && typeof notify.success === 'function') {
+        (added ? notify.success : notify.info)(
+          added ? `${p.name} saved to your wishlist!` : `${p.name} removed from your wishlist!`);
+      }
+    });
+    return btn;
+  }
+
+  // Refresh trạng thái tất cả nút tim khi wishlist thay đổi (tab khác / cloud realtime / đăng nhập)
+  function refreshAllHearts() {
+    if (typeof auth === 'undefined' || typeof auth.isInWishlist !== 'function') return;
+    document.querySelectorAll('.wishlist-heart[data-product-id]').forEach(btn => {
+      const active = auth.isInWishlist(btn.dataset.productId);
+      btn.classList.toggle('active', active);
+      btn.innerHTML = `<i class="${active ? 'fas' : 'far'} fa-heart"></i>`;
+      btn.title = active ? 'Remove from wishlist' : 'Add to wishlist';
+    });
+  }
+
   /* ── Tạo thẻ sản phẩm (HTML) ── */
   function createCard(p) {
     const card = document.createElement('div');
     card.className = 'product-card';
     card.dataset.productId = p.id;
-    card.dataset.type = p.type;
+    card.dataset.category = p.category;
     card.dataset.price = p.price;
 
     const imgHtml = p.image
@@ -126,7 +166,7 @@
     card.innerHTML = `
       <div class="product-image">${imgHtml}</div>
       <div class="product-info">
-        <div class="product-category">${p.type.charAt(0).toUpperCase() + p.type.slice(1)}</div>
+        <div class="product-category">${p.category.charAt(0).toUpperCase() + p.category.slice(1)}</div>
         <h3 class="product-title">${p.name}</h3>
         <div class="product-price">${priceHtml}</div>
         <div class="product-rating">${ratingHtml(p.rating)}</div>
@@ -143,7 +183,7 @@
         name: p.name,
         price: p.price,
         image: p.image,
-        category: p.type,
+        category: p.category,
         quantity: 1
       };
       if (typeof cartManager !== 'undefined' && cartManager.addItem(product)) {
@@ -161,9 +201,13 @@
       }
     });
 
+    // Nút heart wishlist (góc trên phải ảnh)
+    const imgWrap = card.querySelector('.product-image');
+    if (imgWrap) imgWrap.appendChild(createWishlistBtn(p));
+
     // Click vào thẻ sản phẩm -> xem chi tiết
     card.addEventListener('click', function (e) {
-      if (e.target.closest('.add-to-cart')) return;
+      if (e.target.closest('.add-to-cart') || e.target.closest('.wishlist-heart')) return;
       const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       window.location.href = `product-detail.html?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(slug)}`;
     });
@@ -176,7 +220,7 @@
     const card = document.createElement('div');
     card.className = 'product-card';
     card.dataset.productId = p.id;
-    card.dataset.type = p.type;
+    card.dataset.category = p.category;
     card.dataset.price = p.price;
 
     const discounted = (p.price * (1 - discount / 100)).toFixed(2);
@@ -190,7 +234,7 @@
       <div class="discount-badge">-${discount}%</div>
       <div class="product-image">${imgHtml}</div>
       <div class="product-info">
-        <div class="product-category">${p.type.charAt(0).toUpperCase() + p.type.slice(1)}</div>
+        <div class="product-category">${p.category.charAt(0).toUpperCase() + p.category.slice(1)}</div>
         <h3 class="product-title">${p.name}</h3>
         <div class="product-price">
           <span class="current-price">${formatPrice(Number(discounted))}</span>
@@ -212,7 +256,7 @@
         name: p.name,
         price: Number(discounted),
         image: p.image,
-        category: p.type,
+        category: p.category,
         quantity: 1
       };
       if (typeof cartManager !== 'undefined' && cartManager.addItem(product)) {
@@ -235,8 +279,12 @@
       window.location.href = 'checkout.html';
     });
 
+    // Nút heart wishlist (góc trên phải ảnh)
+    const dealImgWrap = card.querySelector('.product-image');
+    if (dealImgWrap) dealImgWrap.appendChild(createWishlistBtn(p));
+
     card.addEventListener('click', function (e) {
-      if (e.target.closest('.add-deal-cart') || e.target.closest('.buy-now')) return;
+      if (e.target.closest('.add-deal-cart') || e.target.closest('.buy-now') || e.target.closest('.wishlist-heart')) return;
       const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       window.location.href = `product-detail.html?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(slug)}`;
     });
@@ -313,6 +361,14 @@
       const allProducts = await fetchProducts();
       let filtered = allProducts.filter(p => matchesCategory(p, catFilter));
 
+      if (grid.dataset.sort === 'featured') {
+        filtered.sort((a, b) => {
+          const diff = (b.rating || 0) - (a.rating || 0);
+          if (diff !== 0) return diff;
+          return (a.name || '').localeCompare(b.name || '');
+        });
+      }
+
       if (!filtered.length) {
         showEmpty(grid, 'No products match this category.');
         if (paginationContainer) paginationContainer.innerHTML = '';
@@ -367,14 +423,82 @@
       if (priceFilter) {
         filtered = filtered.filter(p => {
           if (priceFilter === 'under50') return p.price < 50;
+          if (priceFilter === 'under100') return p.price < 100;
+          if (priceFilter === 'under500') return p.price < 500;
           if (priceFilter === '50-200') return p.price >= 50 && p.price <= 200;
           if (priceFilter === '200-500') return p.price > 200 && p.price <= 500;
+          if (priceFilter === '100-250') return p.price >= 100 && p.price <= 250;
+          if (priceFilter === '250-500') return p.price > 250 && p.price <= 500;
           if (priceFilter === 'over500') return p.price > 500;
-          if (priceFilter === 'under500') return p.price < 500;
           if (priceFilter === '500-1000') return p.price >= 500 && p.price <= 1000;
           if (priceFilter === '1000-1500') return p.price >= 1000 && p.price <= 1500;
+          if (priceFilter === '1500-2000') return p.price >= 1500 && p.price <= 2000;
           if (priceFilter === 'over1500') return p.price > 1500;
+          if (priceFilter === 'over2000') return p.price > 2000;
           return true;
+        });
+      }
+
+      const brandFilter = activeFilters[gridId + '_brand'];
+      if (brandFilter) {
+        filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(brandFilter.toLowerCase()));
+      }
+
+      const storageFilter = activeFilters[gridId + '_storage'];
+      if (storageFilter) {
+        filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(storageFilter.toLowerCase()));
+      }
+
+      const cpuFilter = activeFilters[gridId + '_cpu'];
+      if (cpuFilter) {
+        filtered = filtered.filter(p => {
+          const n = (p.name || '').toLowerCase();
+          if (cpuFilter === 'i3') return n.includes('i3');
+          if (cpuFilter === 'i5') return n.includes('i5');
+          if (cpuFilter === 'i7') return n.includes('i7');
+          if (cpuFilter === 'i9') return n.includes('i9');
+          if (cpuFilter === 'ryzen5') return n.includes('ryzen 5');
+          if (cpuFilter === 'ryzen7') return n.includes('ryzen 7');
+          if (cpuFilter === 'ryzen9') return n.includes('ryzen 9');
+          if (cpuFilter === 'm1m2') return n.includes('m1') || n.includes('m2');
+          return false;
+        });
+      }
+
+      const ramFilter = activeFilters[gridId + '_ram'];
+      if (ramFilter) {
+        filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(ramFilter.toLowerCase()));
+      }
+
+      const typeFilter = activeFilters[gridId + '_type'];
+      if (typeFilter) {
+        filtered = filtered.filter(p => {
+          const n = (p.name || '').toLowerCase();
+          if (typeFilter === 'audio') return n.includes('audio') || n.includes('headphone') || n.includes('earbuds');
+          if (typeFilter === 'charger') return n.includes('charger') || n.includes('cable');
+          if (typeFilter === 'case') return n.includes('case') || n.includes('screen protector');
+          if (typeFilter === 'stand') return n.includes('stand') || n.includes('mount');
+          if (typeFilter === 'powerbank') return n.includes('power bank') || n.includes('powerbank');
+          if (typeFilter === 'phoneacc') return n.includes('phone');
+          if (typeFilter === 'laptopacc') return n.includes('laptop');
+          return false;
+        });
+      }
+
+      const compatibilityFilter = activeFilters[gridId + '_compatibility'];
+      if (compatibilityFilter) {
+        filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(compatibilityFilter.toLowerCase()));
+      }
+
+      const connectivityFilter = activeFilters[gridId + '_connectivity'];
+      if (connectivityFilter) {
+        filtered = filtered.filter(p => {
+          const n = (p.name || '').toLowerCase();
+          if (connectivityFilter === 'wifi') return n.includes('wi-fi') || n.includes('wifi');
+          if (connectivityFilter === 'bluetooth') return n.includes('bluetooth');
+          if (connectivityFilter === 'zigbee') return n.includes('zigbee');
+          if (connectivityFilter === 'zwave') return n.includes('z-wave');
+          return false;
         });
       }
 
@@ -389,7 +513,7 @@
       const searchQuery = activeFilters[gridId + '_search'];
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.type.toLowerCase().includes(q));
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
       }
 
       if (!filtered.length) {
@@ -471,13 +595,11 @@
     const grids = document.querySelectorAll('.product-grid');
     if (!grids.length) return;
 
-    grids.forEach(grid => {
-      const gridId = 'grid_' + Math.random().toString(36).slice(2, 8);
-      grid.dataset.gridId = gridId;
-    });
-
     for (const grid of grids) {
-      initFilters(grid);
+      if (!grid.dataset.gridId) {
+        grid.dataset.gridId = 'grid_' + Math.random().toString(36).slice(2, 8);
+        initFilters(grid);
+      }
       await renderGrid(grid);
     }
   }
@@ -499,11 +621,14 @@
     startAutoRefresh();
   }
 
+  // Tim wishlist cập nhật theo realtime (cloud/tab khác/đăng nhập)
+  ['wishlist:updated', 'auth:data-pulled'].forEach(evt => window.addEventListener(evt, refreshAllHearts));
+
   /* ── Public API để debug ── */
   window.__productsAPI = { fetchProducts, render, applyFilters, refresh: () => { cachedProducts = null; lastFetch = 0; render(); } };
 
   /* ── Thêm CSS animation pulse cho skeleton loading ── */
   const style = document.createElement('style');
-  style.textContent = `@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}.product-skeleton{pointer-events:none}.product-empty,.product-error{grid-column:1/-1;text-align:center;padding:60px 20px;color:#6b7280;font-size:16px}.product-search{width:100%;padding:12px 15px;border:1px solid #d1d5db;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;background:#fff;outline:none;transition:border-color .2s ease;box-sizing:border-box;margin-bottom:20px}.product-search:focus{border-color:#1C4D8D}`;
+  style.textContent = `@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}.product-skeleton{pointer-events:none}.product-empty,.product-error{grid-column:1/-1;text-align:center;padding:60px 20px;color:#6b7280;font-size:16px}.product-search{width:100%;padding:12px 15px;border:1px solid #d1d5db;border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;background:#fff;outline:none;transition:border-color .2s ease;box-sizing:border-box;margin-bottom:20px}.product-search:focus{border-color:#1C4D8D}.product-image{position:relative}.wishlist-heart{position:absolute;top:10px;right:10px;width:36px;height:36px;min-height:36px;border-radius:50%;background:rgba(255,255,255,.94);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:#64748b;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .15s ease,color .15s ease;z-index:5;padding:0}.wishlist-heart:hover{transform:scale(1.12);color:#e11d48;background:#fff}.wishlist-heart.active,.wishlist-heart.active:hover{color:#e11d48}`;
   document.head.appendChild(style);
 })();
