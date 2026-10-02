@@ -1,62 +1,114 @@
 # Chat proxy Worker
 
-Giữ API key Gemini ở server thay vì trong trình duyệt.
+Proxy cho chatbot của `final/js/components/chatbot.js`. Inference chạy trong hạ
+tầng Cloudflare qua **Workers AI**, nên không có API key nào phải quản lý và
+không có key nào lọt xuống trình duyệt.
 
-- `chat-proxy.js` — Worker, đọc key từ secret binding `GEMINI_API_KEY`
-- `wrangler.toml` — cấu hình, trong đó có danh sách origin được phép
+- `chat-proxy.js` — Worker, gọi `env.AI.run()`
+- `chat-proxy.test.mjs` — test hợp đồng API, stub `env.AI.run` nên không tốn hạn mức
+- `wrangler.toml` — cấu hình, gồm binding AI và danh sách origin được phép
 
-## Deploy lần đầu
+## Deploy
 
 ```bash
 npm install
 npx wrangler login
-npx wrangler secret put GEMINI_API_KEY
 npx wrangler deploy
 ```
 
-Lệnh `secret put` sẽ hỏi bạn dán key. Key được lưu trong Cloudflare, **không** nằm trong file nào trong repo.
+Không có bước `secret put`: Workers AI được gọi qua binding, không qua API key.
 
-Deploy xong bạn sẽ nhận URL dạng `https://techstore-chat.<subdomain>.workers.dev`.
+## Test
 
-## Model Gemini
+```bash
+npm test
+```
 
-Model nằm ở hằng số `GEMINI_MODEL` trong `chat-proxy.js`:
+Chỉ chạy test, **không** deploy. Test tự stub `env.AI.run` nên không gọi mạng
+và không tiêu hao neuron.
+
+## Model
+
+Model nằm ở hằng số `AI_MODEL` trong `chat-proxy.js`:
 
 ```js
-const GEMINI_MODEL = 'gemini-flash-lite-latest';
+const AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 ```
 
-Đây là **alias** (`-latest`), không phải tên version cứng. Không hardcode version vì Google có thể retire model bất cứ lúc nào — `gemini-2.5-flash-lite` đã bị gỡ khỏi `:generateContent`, khiến Worker trả về:
+**Tên model phải khớp đúng danh sách trong tài khoản Cloudflare.** Sai tên là
+lỗi hỏng âm thầm, nên đừng đoán theo trí nhớ — hỏi tài khoản trước:
+
+```bash
+npx wrangler ai models list
+```
+
+Tên có đuôi `-fp8`. Có thể đoán sai `llama-3.3-70b-instruct-fast` (thiếu
+`-fp8`) và Worker sẽ báo lỗi cấu hình model ngay khi có người gọi.
+
+Nếu cần nhẹ hơn, `@cf/meta/llama-3.1-8b-instruct-fp8` rẻ hơn nhiều nhưng
+trả lời tiếng Việt kém hơn hẳn.
+
+## Hạn mức
+
+Workers AI có hạn mức neuron theo ngày; free tier khoảng 10.000 neuron/ngày.
+Model 70B tiêu nhiều hơn 8B khoảng một bậc độ lớn, nên site đông khách sẽ
+cần nâng cấp hoặc hạ xuống model nhẹ.
+
+Theo dõi mức tiêu: <https://dash.cloudflare.com/?to=/:account/ai/observability>
+
+## Vì sao không dùng Gemini
+
+Bản đầu tiên của Worker gọi Gemini API với key trong secret binding. Cách đó
+chạy được ở local nhưng **hỏng trên Cloudflare**: Gemini chặn theo vị trí IP của
+caller, mà Worker egress từ nhiều vùng, nên trả về:
+
+```
+FAILED_PRECONDITION — User location is not supported for the API use.
+```
+
+Lỗi này đến từ phía Google nên Worker báo chung là `"Yêu cầu không hợp lệ."`
+(400) — rất dễ bị nhầm là lỗi code hoặc key hết hạn. Thực tế key vẫn hợp lệ.
+
+Đổi sang Workers AI giải quyết tận gốc vì inference chạy trong Cloudflare,
+không có IP egress ra ngoài.
+
+Nếu sau này muốn quay lại Gemini, phải đặt proxy ở host cố định trong vùng
+Google hỗ trợ, không đặt trong Worker.
+
+## Chẩn đoán lỗi
+
+Log lỗi chỉ nằm ở server, trả về client chỉ có thông báo chung chung. Xem log:
+
+```bash
+npx wrangler tail techstore-chat
+```
+
+Rồi gọi endpoint, log sẽ in `[ai] ok model=...` hoặc `[ai] error model=...`.
+
+## API
+
+`POST /api/chat`
 
 ```json
-{"error":"Dịch vụ AI đang lỗi (404)."}
+{ "message": "có laptop nào rẻ không?", "history": [], "products": [] }
 ```
 
-Lưu ý: 404 nghĩa là key hợp lệ nhưng tên model sai. Key sai hoặc hết hạn sẽ trả 400 `API_KEY_INVALID` và Worker báo `"Yêu cầu không hợp lệ."`.
+Trả `200 {"reply": "..."}`. `history` là mảng `{role, parts:[{text}]}`, `products`
+là mảng `{title|name, category, price, rating}` — Worker tự cắt bớt độ dài để
+không vượt giới hạn của model.
 
-Khi gặp 404, xem key hiện tại truy cập được những model nào:
-
-```powershell
-$r = curl.exe -s "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000" -H "x-goog-api-key: KEY_CUA_BAN" | ConvertFrom-Json
-$r.models | Where-Object { $_.name -match 'generateContent' } | ForEach-Object { $_.name -replace 'models/','' }
-```
-
-Sửa `GEMINI_MODEL` theo kết quả rồi `npx wrangler deploy` lại. Ứng viên tối giản: `gemini-flash-lite-latest` (rẻ nhất) hoặc `gemini-3.1-flash-lite`.
+Client gọi qua Worker, không gọi thẳng lên Workers AI.
 
 ## Trỏ frontend vào Worker
 
-Trong `js/components/chatbot.js` (đi từ `final/`), sửa `CHAT_ENDPOINT`:
+Trong `js/components/chatbot.js` (đi từ `final/`):
 
 ```js
-// Worker khác domain với site — đây là cấu hình đang dùng
 const CHAT_ENDPOINT = 'https://techstore-chat.tranbaotran-project-web.workers.dev/api/chat';
-
-// hoặc nếu Worker đứng chung domain (route đã map /api/* sang Worker)
-// thì giữ nguyên đường dẫn tương đối
-const CHAT_ENDPOINT = '/api/chat';
 ```
 
-Không dùng đường dẫn tương đối khi Worker nằm ở domain khác: `/api/chat` sẽ được trình duyệt gửi tới domain của site (`tranbaotran355.github.io`) và luôn trả 404.
+Worker nằm khác domain với site nên **không** dùng đường dẫn tương đối
+`/api/chat`: trình duyệt sẽ gửi tới domain của site và luôn nhận 404.
 
 ## Chạy local
 
@@ -64,13 +116,13 @@ Không dùng đường dẫn tương đối khi Worker nằm ở domain khác: `
 npx wrangler dev
 ```
 
-Worker chạy ở `http://localhost:8787`. File `.dev.vars` để test local đã bị `.gitignore` loại:
+Worker chạy ở `http://localhost:8787`. Binding AI hoạt động cả khi dev local, và
+`.dev.vars` không còn cần thiết vì đã không có secret nào.
 
-```bash
-echo "GEMINI_API_KEY=key_cua_ban" > .dev.vars
-```
+## Origin được phép
 
-## Thêm domain thật vào allowlist
+Trình duyệt ở `https://tranbaotran355.github.io/JSA64/` gửi header
+`Origin: https://tranbaotran355.github.io` — **không** có path `/JSA64/`.
 
 Sửa `ALLOWED_ORIGINS` trong `wrangler.toml` rồi deploy lại:
 
@@ -79,12 +131,11 @@ Sửa `ALLOWED_ORIGINS` trong `wrangler.toml` rồi deploy lại:
 ALLOWED_ORIGINS = "http://localhost:5500,https://ten-ban.github.io"
 ```
 
-Danh sách rỗng nghĩa là cho phép mọi origin — chỉ nên dùng khi dev local.
-
-## Xoá key sau khi lộ
-
-Nếu key từng bị lộ, thu hồi tại <https://aistudio.google.com/apikey> rồi chạy lại `npx wrangler secret put GEMINI_API_KEY`.
+Danh sách rỗng = cho phép mọi origin, tức ai biết URL Worker cũng gọi được bằng
+curl và tiêu hao hạn mức AI của bạn. Chỉ dùng khi dev local.
 
 ## Giới hạn
 
-Rate limit 10 request/phút mỗi IP, lưu trong bộ nhớ của instance Worker. Vì instance là stateless nên đây chỉ là hàng rào cơ bản, chặn được việc lạm dụng cơ bản chứ không phải tấn công có chủ đích.
+Rate limit 10 request/phút mỗi IP, lưu trong bộ nhớ của instance Worker. Vì
+instance là stateless nên đây chỉ là hàng rào cơ bản, chặn được lạm dụng thường
+ngày chứ không phải tấn công có chủ đích.

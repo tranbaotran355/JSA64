@@ -1,13 +1,17 @@
-// worker/chat-proxy.js - Cloudflare Worker làm trung gian cho chatbot Gemini.
+// worker/chat-proxy.js - Cloudflare Worker làm trung gian cho chatbot.
 //
-// Mục đích: API key Gemini KHÔNG BAO GIỜ được gửi xuống trình duyệt.
-// Key nằm trong secret binding (wrangler secret put GEMINI_API_KEY).
+// Mục đích: inference chạy trong hạ tầng Cloudflare qua Workers AI, không
+// có API key nào cần quản lý và không có key nào lọt xuống trình duyệt.
 // Client chỉ gọi POST /api/chat trên Worker này.
+//
+// Vì sao không dùng Gemini: Gemini API chặn theo vị trí IP của caller, mà
+// Worker egress từ nhiều vùng nên trả về
+// `FAILED_PRECONDITION — User location is not supported for the API use`.
+// Workers AI chạy ngay trong Cloudflare nên không dính giới hạn đó.
 
-// Dùng alias 'latest' thay vì tên version cứng: model Flash-Lite đã bị
-// Gemini gỡ khỏi :generateContent (gemini-2.5-flash-lite trả 404), nên hardcode
-// version sẽ chết lặng lẽ khi Google retire model.
-const GEMINI_MODEL = 'gemini-flash-lite-latest';
+// Tên model phải khớp đúng danh sách trong tài khoản Cloudflare. Sai tên là
+// nguyên nhân hỏng âm thầm, nên đừng đoán: xem `npx wrangler ai models list`.
+const AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_MESSAGE_CHARS = 2000;
 const MAX_TURN_CHARS = 2000;
@@ -93,37 +97,30 @@ function buildPrompt({ message, history, products }) {
     return `${systemCtx}\n\n${historyBlock}Khách: ${clip(message, MAX_MESSAGE_CHARS)}\nTrợ lý:`;
 }
 
-async function callGemini(env, prompt) {
-    // Key truyền qua header, không nằm trên query string để không lọt vào log.
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': env.GEMINI_API_KEY
-            },
-            body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] })
+async function callWorkersAI(env, prompt) {
+    try {
+        const res = await env.AI.run(AI_MODEL, {
+            messages: [{ role: 'user', content: prompt }]
+        });
+
+        const reply = (res && typeof res.response === 'string' ? res.response : '').trim();
+        console.log(`[ai] ok model=${AI_MODEL} promptChars=${prompt.length} replyChars=${reply.length}`);
+
+        if (!reply) return { error: 'Dịch vụ AI trả về nội dung rỗng.', status: 502 };
+        return { reply };
+    } catch (err) {
+        // Log phía server để chẩn đoán được (xem `npx wrangler tail`).
+        // KHÔNG trả nguyên lỗi của Cloudflare về client.
+        const detail = String((err && err.message) || err).slice(0, 1000);
+        console.log(`[ai] error model=${AI_MODEL} detail=${detail}`);
+
+        // Sai tên model là lỗi dễ gặp nhất, tách riêng để dễ đoán.
+        if (/model/i.test(detail)) return { error: 'Dịch vụ AI đang lỗi cấu hình model.', status: 502 };
+        if (/quota|neuron|limit|rate/i.test(detail)) {
+            return { error: 'Đã vượt hạn mức AI, vui lòng thử lại sau.', status: 429 };
         }
-    );
-
-    if (!res.ok) {
-        // Log phía server để chẩn đoán được lỗi (xem `npx wrangler tail`).
-        // KHÔNG trả nguyên body lỗi của Google về client.
-        const detail = await res.text().catch(() => '');
-        console.log(`[gemini] ${res.status} model=${GEMINI_MODEL} detail=${detail.slice(0, 1000)}`);
-
-        if (res.status === 429) return { error: 'Đã vượt hạn mức, vui lòng thử lại sau.', status: 429 };
-        if (res.status === 400) return { error: 'Yêu cầu không hợp lệ.', status: 400 };
-        if (res.status === 401 || res.status === 403) return { error: 'Máy chủ chưa được cấu hình API key.', status: 502 };
-        return { error: `Dịch vụ AI đang lỗi (${res.status}).`, status: 502 };
+        return { error: 'Dịch vụ AI đang lỗi.', status: 502 };
     }
-
-    console.log(`[gemini] ok model=${GEMINI_MODEL} promptChars=${prompt.length}`);
-
-    const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    return { reply: reply || 'Không có phản hồi.' };
 }
 
 export default {
@@ -155,8 +152,8 @@ export default {
             return json({ error: 'Bạn gửi yêu cầu quá nhanh, thử lại sau.' }, 429, cors);
         }
 
-        if (!env.GEMINI_API_KEY) {
-            return json({ error: 'Máy chủ chưa cấu hình API key.' }, 503, cors);
+        if (!env.AI) {
+            return json({ error: 'Máy chủ chưa cấu hình Workers AI.' }, 503, cors);
         }
 
         let body;
@@ -175,7 +172,7 @@ export default {
         }
 
         try {
-            const result = await callGemini(env, buildPrompt({ message, history: body.history, products: body.products }));
+            const result = await callWorkersAI(env, buildPrompt({ message, history: body.history, products: body.products }));
             if (result.error) return json({ error: result.error }, result.status, cors);
             return json({ reply: result.reply }, 200, cors);
         } catch {
