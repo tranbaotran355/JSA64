@@ -82,21 +82,21 @@
     }
 
     /* ── Gọi proxy Worker (giữ API key ở server) ── */
-    function buildPrompt(userMessage) {
-        const productList = products.map(p => `${p.title} | ${p.category} | $${p.price} | ★${p.rating}`).join('\n');
-        const systemCtx = `Bạn là trợ lý tư vấn bán hàng thân thiện. Danh sách sản phẩm:\n${productList}\nTrả lời bằng tiếng Việt, ngắn gọn, hiển thị giá bằng USD.`;
-        let historyText = '';
-        for (const turn of chatHistory) {
-            historyText += `${turn.role === 'user' ? 'Khách' : 'Trợ lý'}: ${turn.parts[0].text}\n`;
-        }
-        return `${systemCtx}\n\n${historyText ? 'Lịch sử:\n' + historyText + '\n' : ''}Khách: ${userMessage}\nTrợ lý:`;
-    }
-
     async function sendToGemini(userMessage) {
         const res = await fetch(CHAT_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userMessage, history: chatHistory, products })
+            body: JSON.stringify({
+                message: userMessage,
+                history: chatHistory,
+                // Chỉ gửi field Worker thật sự dùng để dựng prompt.
+                products: products.map(p => ({
+                    title: p.title,
+                    category: p.category,
+                    price: p.price,
+                    rating: p.rating
+                }))
+            })
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));

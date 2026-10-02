@@ -71,7 +71,10 @@ function buildPrompt({ message, history, products }) {
         .map((p) => {
             const price = Number(p && p.price) || 0;
             const rating = Number(p && p.rating) || 0;
-            return `${clip(p && p.title, 120) || 'Unknown Product'} | ${clip(p && p.category, 60) || 'Khác'} | $${price} | ★${rating}`;
+            // Firestore lưu tên sản phẩm ở field 'name'; client chatbot.js đã map
+            // sang 'title', nhưng gọi API trực tiếp thì chỉ có 'name'.
+            const title = clip(p && (p.title || p.name), 120) || 'Unknown Product';
+            return `${title} | ${clip(p && p.category, 60) || 'Khác'} | $${price} | ★${rating}`;
         })
         .join('\n');
 
@@ -105,12 +108,18 @@ async function callGemini(env, prompt) {
     );
 
     if (!res.ok) {
-        // Không trả nguyên body lỗi của Google về client.
+        // Log phía server để chẩn đoán được lỗi (xem `npx wrangler tail`).
+        // KHÔNG trả nguyên body lỗi của Google về client.
+        const detail = await res.text().catch(() => '');
+        console.log(`[gemini] ${res.status} model=${GEMINI_MODEL} detail=${detail.slice(0, 1000)}`);
+
         if (res.status === 429) return { error: 'Đã vượt hạn mức, vui lòng thử lại sau.', status: 429 };
         if (res.status === 400) return { error: 'Yêu cầu không hợp lệ.', status: 400 };
         if (res.status === 401 || res.status === 403) return { error: 'Máy chủ chưa được cấu hình API key.', status: 502 };
         return { error: `Dịch vụ AI đang lỗi (${res.status}).`, status: 502 };
     }
+
+    console.log(`[gemini] ok model=${GEMINI_MODEL} promptChars=${prompt.length}`);
 
     const data = await res.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
