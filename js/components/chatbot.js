@@ -5,10 +5,9 @@
 // API key KHÔNG nằm trong file này. Request đi qua Cloudflare Worker
 // (xem worker/chat-proxy.js), Worker giữ key trong secret binding.
 (function () {
-    // Đường dẫn tương đối khi Worker đứng chung domain với site.
-    // Nếu deploy Worker ở domain riêng, đổi thành URL đầy đủ, ví dụ:
-    // const CHAT_ENDPOINT = 'https://techstore-chat.<sub>.workers.dev/api/chat';
-    const CHAT_ENDPOINT = '/api/chat';
+    // Worker deploy ở domain riêng (workers.dev) nên phải dùng URL đầy đủ.
+    // Đường dẫn tương đối '/api/chat' sẽ trỏ về domain của site (github.io) và luôn 404.
+    const CHAT_ENDPOINT = 'https://techstore-chat.tranbaotran-project-web.workers.dev/api/chat';
 
     let products = [];
     let chatHistory = [];

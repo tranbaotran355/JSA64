@@ -4,7 +4,10 @@
 // Key nằm trong secret binding (wrangler secret put GEMINI_API_KEY).
 // Client chỉ gọi POST /api/chat trên Worker này.
 
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+// Dùng alias 'latest' thay vì tên version cứng: model Flash-Lite đã bị
+// Gemini gỡ khỏi :generateContent (gemini-2.5-flash-lite trả 404), nên hardcode
+// version sẽ chết lặng lẽ khi Google retire model.
+const GEMINI_MODEL = 'gemini-flash-lite-latest';
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_MESSAGE_CHARS = 2000;
 const MAX_TURN_CHARS = 2000;
@@ -34,7 +37,9 @@ function allowedOrigins(env) {
 function corsHeaders(origin, allowList) {
     const ok = allowList.includes(origin);
     return {
-        'Access-Control-Allow-Origin': ok ? origin : (allowList[0] || 'null'),
+        // Origin không hợp lệ thì trả 'null'. Trả allowList[0] là sai ngữ nghĩa:
+        // header khai báo một origin mà request thực sự không có.
+        'Access-Control-Allow-Origin': ok ? origin : 'null',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Max-Age': '86400',

@@ -18,18 +18,45 @@ Lệnh `secret put` sẽ hỏi bạn dán key. Key được lưu trong Cloudflar
 
 Deploy xong bạn sẽ nhận URL dạng `https://techstore-chat.<subdomain>.workers.dev`.
 
+## Model Gemini
+
+Model nằm ở hằng số `GEMINI_MODEL` trong `chat-proxy.js`:
+
+```js
+const GEMINI_MODEL = 'gemini-flash-lite-latest';
+```
+
+Đây là **alias** (`-latest`), không phải tên version cứng. Không hardcode version vì Google có thể retire model bất cứ lúc nào — `gemini-2.5-flash-lite` đã bị gỡ khỏi `:generateContent`, khiến Worker trả về:
+
+```json
+{"error":"Dịch vụ AI đang lỗi (404)."}
+```
+
+Lưu ý: 404 nghĩa là key hợp lệ nhưng tên model sai. Key sai hoặc hết hạn sẽ trả 400 `API_KEY_INVALID` và Worker báo `"Yêu cầu không hợp lệ."`.
+
+Khi gặp 404, xem key hiện tại truy cập được những model nào:
+
+```powershell
+$r = curl.exe -s "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000" -H "x-goog-api-key: KEY_CUA_BAN" | ConvertFrom-Json
+$r.models | Where-Object { $_.name -match 'generateContent' } | ForEach-Object { $_.name -replace 'models/','' }
+```
+
+Sửa `GEMINI_MODEL` theo kết quả rồi `npx wrangler deploy` lại. Ứng viên tối giản: `gemini-flash-lite-latest` (rẻ nhất) hoặc `gemini-3.1-flash-lite`.
+
 ## Trỏ frontend vào Worker
 
 Trong `js/components/chatbot.js` (đi từ `final/`), sửa `CHAT_ENDPOINT`:
 
 ```js
-// Worker khác domain với site
-const CHAT_ENDPOINT = 'https://techstore-chat.<subdomain>.workers.dev/api/chat';
+// Worker khác domain với site — đây là cấu hình đang dùng
+const CHAT_ENDPOINT = 'https://techstore-chat.tranbaotran-project-web.workers.dev/api/chat';
 
 // hoặc nếu Worker đứng chung domain (route đã map /api/* sang Worker)
 // thì giữ nguyên đường dẫn tương đối
 const CHAT_ENDPOINT = '/api/chat';
 ```
+
+Không dùng đường dẫn tương đối khi Worker nằm ở domain khác: `/api/chat` sẽ được trình duyệt gửi tới domain của site (`tranbaotran355.github.io`) và luôn trả 404.
 
 ## Chạy local
 
