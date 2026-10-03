@@ -137,7 +137,9 @@
             data.__uid = doc.id;
             users.push(data);
         });
+        var currentUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.id : null;
         users = users.filter(function (u) {
+            if (currentUid && u.__uid === currentUid) return false;
             return (u.role || 'customer') !== 'admin';
         });
         users.sort(function (a, b) {
