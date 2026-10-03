@@ -108,11 +108,11 @@
 
             var banLabel = info.banned ? tr('Unban') : tr('Ban');
             var banBtn = '<button type="button" class="btn-user btn-ban" data-id="' + user.__uid
-                + '" data-name="' + escapeHtml(name) + '" data-action="' + (info.banned ? 'unban' : 'ban') + '">'
+                + '" data-name="' + escapeHtml(name) + '" data-role="' + escapeHtml(user.role || 'customer') + '" data-action="' + (info.banned ? 'unban' : 'ban') + '">'
                 + '<i class="fas fa-' + (info.banned ? 'undo' : 'ban') + '"></i> ' + banLabel + '</button>';
 
             var deleteBtn = '<button type="button" class="btn-user btn-delete" data-id="' + user.__uid
-                + '" data-name="' + escapeHtml(name) + '" data-action="delete">'
+                + '" data-name="' + escapeHtml(name) + '" data-role="' + escapeHtml(user.role || 'customer') + '" data-action="delete">'
                 + '<i class="fas fa-trash-alt"></i> ' + tr('Delete') + '</button>';
 
             return '<tr>'
@@ -136,6 +136,9 @@
             var data = doc.data() || {};
             data.__uid = doc.id;
             users.push(data);
+        });
+        users = users.filter(function (u) {
+            return (u.role || 'customer') !== 'admin';
         });
         users.sort(function (a, b) {
             var t1 = new Date(a.createdAt || 0).getTime();
@@ -293,6 +296,13 @@
             var uid = btn.dataset.id;
             var name = btn.dataset.name || '';
             var action = btn.dataset.action;
+            var roleTarget = btn.dataset.role || 'customer';
+
+            // Không cho phép xóa hoặc ban tài khoản admin
+            if (roleTarget === 'admin') {
+                if (window.notify && notify.error) notify.error(tr('Không thể xóa hoặc cấm tài khoản quản trị viên.'));
+                return;
+            }
 
             // Bảo vệ tài khoản admin hiện tại
             if (uid && auth.currentUser && uid === auth.currentUser.id && action !== 'unban') {
